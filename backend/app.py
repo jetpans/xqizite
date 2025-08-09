@@ -1,14 +1,22 @@
+from dotenv import load_dotenv
+load_dotenv()
+
+from flask_socketio import SocketIO
+from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, \
+    unset_jwt_cookies, jwt_required, JWTManager
+from config import DevelopmentConfig, ProductionConfig
+from controllers.roomController import RoomController
+from controllers.chatController import ChatController
+from controllers.authController import AuthController
 from flask import Flask, jsonify, request, render_template, redirect, session
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv
+
 from datetime import datetime, timedelta, timezone
 import os
 import json
-from controllers.authController import AuthController
-from config import DevelopmentConfig, ProductionConfig
-from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, \
-    unset_jwt_cookies, jwt_required, JWTManager
+
+
 
 
 app = Flask(__name__)
@@ -30,11 +38,13 @@ else:
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 
 @app.before_request
 def do():
-    print(request.headers)
+    # print(request.headers)
+    pass
 
 
 @app.route("/")
@@ -43,10 +53,10 @@ def home():
     # return render_template("index.html")
 
 
-@app.route("/<path:path>", methods=["GET"])
-def catch_all(path):
-    return {"success": True, "data": "API is running"}
-    # return render_template("index.html")
+# @app.route("/<path:path>", methods=["GET"])
+# def catch_all(path):
+#     return {"success": True, "data": "API is running"}
+#     # return render_template("index.html")
 
 
 @app.after_request
@@ -80,3 +90,8 @@ def refresh_expiring_jwts(response):
 
 
 authController = AuthController(app, db, bcrypt, jwt)
+chatController = ChatController(app, db, jwt, socketio)
+roomController = RoomController(app, db, jwt)
+
+if __name__ == "__main__":
+    socketio.run(app, debug=True, host="0.0.0.0", port=5000)

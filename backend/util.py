@@ -1,68 +1,23 @@
 from flask import session, jsonify
 from functools import wraps
 from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
-                               unset_jwt_cookies, jwt_required, JWTManager, verify_jwt_in_request
+    unset_jwt_cookies, jwt_required, JWTManager, verify_jwt_in_request, decode_token
 
-def getRole(auth_users):
 
+# Make enum for ChatRoomType
+class EChatRoomType:
+    DEFAULT = 0
+    FAST = 1
+
+
+def get_user_from_jwt(jwt):
+    payload = decode_token(jwt)
+    user = payload.get("sub")
+    return user
+
+
+def verify_jwt(jwt):
     try:
-        return auth_users[session["sID"]].roleId
+        payload = decode_token(jwt)
     except:
-        return None
-            
-    
-def admin_required():
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request(optional=True)
-                claims = get_jwt()
-                if claims["roleId"] in [-1]:
-                    return fn(*args, **kwargs)
-                else:
-                    return {"success": False, "data": "Authentication required"}
-            except Exception as e:
-                # Handle the scenario when JWT is not present or any other exception
-                return {"success": False, "data": "Authentication required"}
-        return decorator
-
-    return wrapper
-
-def visitor_required():
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request(optional=True)
-                claims = get_jwt()
-                if claims["roleId"] in [1,-1,0]:
-                    return fn(*args, **kwargs)
-                else:
-                    return {"success": False, "data": f"Authentication required {claims['roleId']}"}
-            except Exception as e:
-                # Handle the scenario when JWT is not present or any other exception
-                return {"success": False, "data": f"Authentication required. Exception. {str(e)}"}
-        return decorator
-
-    return wrapper
-
-def organiser_required():
-    def wrapper(fn):
-        @wraps(fn)
-        def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request(optional=True)
-                claims = get_jwt()
-                if claims["roleId"] in [1, -1]:
-                    return fn(*args, **kwargs)
-                else:
-                    return {"success": False, "data": "Authentication required"}
-            except Exception as e:
-                # Handle the scenario when JWT is not present or any other exception
-                return {"success": False, "data": "Authentication required"}
-        return decorator
-
-    return wrapper
-
-
+        raise ValueError("Invalid JWT token")

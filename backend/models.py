@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
 from config import DevelopmentConfig, ProductionConfig
+from flask_migrate import migrate, init, upgrade, Migrate
+import uuid
 
 load_dotenv()
 app = Flask(__name__)
@@ -16,22 +18,33 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DB_CONNECT_URL_PROD")
 print(f"Using database URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
 db = SQLAlchemy(app)
 
+migrate = Migrate(app, db)
+
 
 class Account(db.Model):
     __tablename__ = 'accounts'
 
     accountId = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False, unique=True)
-    passwordHash = db.Column(db.String(72), nullable=False)
-    eMail = db.Column(db.String(200), nullable=False)
+    passwordHash = db.Column(db.String(72), nullable=True)
+    eMail = db.Column(db.String(200), nullable=True)
     profileImage = db.Column(db.String(150))
     experience = db.Column(db.Integer, default=0)
+    type = db.Column(db.String(20), default='user')  # e.g., 'user', 'admin', 'guest
 
-    def __init__(self,  username, passwordHash, eMail, profileImage=None):
-        self.username = username
-        self.passwordHash = passwordHash
-        self.eMail = eMail
-        self.profileImage = profileImage
+    def __init__(self, username=None, passwordHash=None, eMail=None, profileImage=None):
+        if not passwordHash or not eMail:
+            passwordHash = None
+            eMail = None
+            profileImage = None
+            self.username = f"guest{uuid.uuid4().hex[:8]}"
+            self.type = 'guest'
+        else:
+            self.username = username
+            self.passwordHash = passwordHash
+            self.eMail = eMail
+            self.profileImage = profileImage
+            self.type = 'user'
 
 
 class Question(db.Model):
@@ -61,10 +74,29 @@ class ChatRoom(db.Model):
 
     chatRoomId = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    typeId = db.Column(db.Integer, db.ForeignKey('chatroom_types.typeId'), nullable=False)
+    icon = db.Column(db.String(100), nullable=True)  # URL to an icon image
     description = db.Column(db.String(500))
+    capacity = db.Column(db.Integer, nullable=False)
+    activeQuestionId = db.Column(db.Integer, db.ForeignKey('questions.questionId'), nullable=True)
 
-    def __init__(self, name, description=None):
+    def __init__(self, name, typeId, capacity, description=None, icon=None):
         self.name = name
+        self.typeId = typeId
+        self.description = description
+        self.icon = icon
+        self.capacity = capacity
+
+
+class ChatRoomType(db.Model):
+    __tablename__ = 'chatroom_types'
+
+    typeId = db.Column(db.Integer, primary_key=True)
+    typeName = db.Column(db.String(50), nullable=False, unique=True)
+    description = db.Column(db.String(200))
+
+    def __init__(self, typeName, description=None):
+        self.typeName = typeName
         self.description = description
 
 
@@ -109,4 +141,10 @@ def hello():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        init()
+
+        # 2. Create a migration (like `flask db migrate -m "Initial migration"`)
+        migrate(message="Initial migration")
+
+        # 3. Apply the migration to the DB (like `flask db upgrade`)
+        upgrade()

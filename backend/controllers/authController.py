@@ -48,6 +48,22 @@ class AuthController(Controller):
 
     def login(self):
         data = request.get_json()
+        if data.get("guest", False):
+            myUser = Account()
+            access_token = create_access_token(identity=myUser.username, additional_claims={
+            }, expires_delta=timedelta(hours=1))
+            user = {
+                "id": myUser.accountId,
+                "username": myUser.username,
+                "email": myUser.eMail,
+            }
+
+            resp = {"success": True, "data": {"user": user, "access_token": access_token}}
+            # resp.set_cookie("username", myUser.username)
+            self.db.session.add(myUser)
+            self.db.session.commit()
+            return resp
+
         result = self.testLoginForm(data)
 
         if result == "OK":

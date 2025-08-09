@@ -29,6 +29,7 @@ import { loginFormSchema } from "@/lib/validation-schemas";
 import dataController from "@/lib/DataController";
 import { useUser } from "@/context/UserContext";
 import { API_URL } from "@/constants";
+import { useRouter } from "next/navigation"; // Use Next.js router for navigation
 
 const formSchema = loginFormSchema;
 
@@ -40,6 +41,8 @@ export default function LoginPreview() {
       password: "",
     },
   });
+
+  const router = useRouter();
 
   const dc = new dataController();
   // Assuming useUser is a custom hook that provides user context
@@ -59,6 +62,7 @@ export default function LoginPreview() {
           if (response.success === true && response.data.success === true) {
             localStorage.setItem("jwt", response.data.data.access_token);
             login(response.data.data.user);
+            router.push("/room");
           } else {
             toast.error("Login failed. Please check your credentials.");
           }
@@ -78,9 +82,40 @@ export default function LoginPreview() {
     }
   }
 
+  const handleGuestLogin = () => {
+    try {
+      let loginData = {
+        guest: true,
+      };
+      dc.PostData(API_URL + "/login", loginData)
+        .then((response) => {
+          if (response.success === true && response.data.success === true) {
+            localStorage.setItem("jwt", response.data.data.access_token);
+            login(response.data.data.user);
+            router.push("/room");
+          } else {
+            toast.error("Login failed. Please check your credentials.");
+          }
+        })
+        .catch((response) => {
+          toast.error("Login failed. Please check your credentials.");
+        });
+    } catch (error) {
+      console.error("Guest login error", error);
+      toast.error("Failed to login as guest.");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-[50vh] h-full w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
+        <Button
+          className="text-2xl bg-slate-950 text-white rounded-lg m-2"
+          onClick={handleGuestLogin}
+        >
+          Continue as guest
+        </Button>
+
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
@@ -147,7 +182,7 @@ export default function LoginPreview() {
           </Form>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="#" className="underline">
+            <Link href="/register" className="underline">
               Sign up
             </Link>
           </div>

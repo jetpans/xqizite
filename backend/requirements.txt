@@ -12,3 +12,4 @@ firebase-admin
 google-cloud-storage
 # firebase_config
 python-firebase
+flask_migrate

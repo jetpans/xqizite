@@ -31,6 +31,7 @@ import { useUser } from "@/context/UserContext";
 import dataController from "@/lib/DataController";
 import { API_URL } from "@/constants";
 const formSchema = registerFormSchema;
+import { useRouter } from "next/navigation"; // Use Next.js router for navigation
 
 export default function RegisterPreview() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,6 +43,8 @@ export default function RegisterPreview() {
       confirmPassword: "",
     },
   });
+
+  const router = useRouter();
 
   const dc = new dataController();
   const { user, login, logout } = useUser();
@@ -61,7 +64,7 @@ export default function RegisterPreview() {
         .then((response) => {
           if (response.success === true && response.data.success === true) {
             setTimeout(() => {
-              window.location.href = "/login";
+              router.push("/login");
             }, 1000);
           } else {
             toast.error("Registration failed. Please try again.");
@@ -89,6 +92,7 @@ export default function RegisterPreview() {
         logout();
       } else {
       }
+      router.push("/room");
     }
   }, [user]);
 
@@ -191,7 +195,7 @@ export default function RegisterPreview() {
           </Form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="#" className="underline">
+            <Link href="/login" className="underline">
               Login
             </Link>
           </div>
