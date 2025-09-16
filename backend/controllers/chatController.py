@@ -27,16 +27,26 @@ class ChatController(Controller):
         user = get_user_from_jwt(token)
         session["username"] = user
         print(f"User {user} connected.")
+        room_counts = self.get_room_counts()
+        emit("update_user_counts", room_counts)
 
     def disconnect(self):
         user = session.get("username")
 
         account = self.db.session.query(Account).filter_by(username=user).first()
         rooms = self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).all()
+        connected_to_rooms = []
         for room in rooms:
             leave_room(room.chatRoomId)
+            connected_to_rooms.append(room.chatRoomId)
+
         self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).delete()
         self.db.session.commit()
+        room_counts = self.get_room_counts()
+        emit("update_user_counts", room_counts, broadcast=True)
+
+        for room_id in connected_to_rooms:
+            emit("update_connected_users", self.get_connected_users(room_id), room=room_id)
         print(f"User {user} disconnected from all rooms.")
 
     def join_chatroom(self, data):
@@ -58,6 +68,11 @@ class ChatController(Controller):
 
         join_room(to_room)
 
+        room_counts = self.get_room_counts()
+        emit("update_user_counts", room_counts, broadcast=True)
+        emit("update_connected_users", self.get_connected_users(data.get("chatRoomId")), room=data.get("chatRoomId"))
+
+
         print(f"Client connected: {user} to room {to_room}")
 
     def leave_chatroom(self, data):
@@ -66,6 +81,10 @@ class ChatController(Controller):
         self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).delete()
         self.db.session.commit()
         leave_room(data.get("chatRoomId"))
+        room_counts = self.get_room_counts()
+        emit("update_user_counts", room_counts, broadcast=True)
+
+        emit("update_connected_users", self.get_connected_users(data.get("chatRoomId")), room=data.get("chatRoomId"))
         print(f"Client disconnected: {user} from any room.")
 
     def send_message(self, data):
@@ -100,3 +119,22 @@ class ChatController(Controller):
             "messageId": the_message.messageId
 
         }, room=room)
+
+    def get_room_counts(self):
+        stmt = self.db.session.query(
+            UserChatRoom.chatRoomId,
+            self.db.func.count(UserChatRoom.accountId).label('user_count')
+        ).group_by(UserChatRoom.chatRoomId).all()
+
+        room_counts = {chatRoomId: user_count for chatRoomId, user_count in stmt}
+        return room_counts
+    
+    def get_connected_users(self, room_id):
+        stmt = self.db.session.query(
+            Account.username,
+            Account.profileImage
+        ).join(UserChatRoom, Account.accountId == UserChatRoom.accountId
+        ).filter(UserChatRoom.chatRoomId == room_id).all()
+
+        users = [{"username": username, "avatar": avatar} for username, avatar in stmt]
+        return users

@@ -32,8 +32,15 @@ export default function Room() {
   const { user, logout } = useUser();
   const [inputValue, setInputValue] = useState(""); // Added state for input
 
-  const { connected, messages, joinRoom, leaveRoom, sendMessage } =
-    useChatSocket({ token: user?.token || "" });
+  const {
+    connected,
+    messages,
+    joinRoom,
+    leaveRoom,
+    sendMessage,
+    userCounts,
+    connectedUsers,
+  } = useChatSocket({ token: user?.token || "" });
 
   // const [messages, setMessages] = useState([
   //   {
@@ -73,13 +80,22 @@ export default function Room() {
   };
 
   useEffect(() => {
+    console.log("User is: ", user);
     if (user !== null) {
       const accessToken = localStorage.getItem("jwt");
       if (accessToken === null) {
         logout();
-      } else {
+        router.push("/login");
+      }
+
+      if (localStorage.getItem("jwt") === null) {
+        router.push("/login");
       }
       router.push("/room");
+    } else {
+      if (localStorage.getItem("jwt") === null) {
+        router.push("/login");
+      }
     }
 
     dc.GetData(API_URL + "/api/rooms")
@@ -94,40 +110,68 @@ export default function Room() {
         toast.error("Login failed. Please check your credentials.");
       });
   }, []);
+
+  useEffect(() => {
+    for (let room of rooms) {
+      room.population = userCounts[room.chatRoomId] || 0;
+    }
+  }, [userCounts]);
+
   return (
     <div className="flex flex-row justify-center mt-[1rem] w-full h-full flex-wrap">
-      <div className="roomlist m-[1rem] min-w-[20vw]">
-        <h2 className="text-lg font-bold mb-4">Chat Rooms</h2>
-        <ul className="space-y-2">
-          {rooms.map((room) => (
-            <li
-              key={room.chatRoomId}
-              className={`p-2 rounded-lg cursor-pointer ${
-                activeRoom.chatRoomId === room.chatRoomId
-                  ? "bg-blue-100"
-                  : "bg-gray-50 hover:bg-gray-100"
-              }`}
-              onClick={() => handleSetActiveRoom(room)}
-            >
-              <div className="flex items-center">
-                <img
-                  src={room.icon}
-                  alt={room.name}
-                  className="w-8 h-8 rounded-full mr-2"
-                />
-                <div>
-                  <h3 className="font-semibold">
-                    {room.name} ({room.population}/{room.capacity})
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {room.type_description}
-                  </p>
+      <div className="info">
+        <div className="roomlist m-[1rem] min-w-[10vw]">
+          <h2 className="text-lg font-bold mb-4">Chat Rooms</h2>
+          <ul className="space-y-2 overflow-y-auto max-h-[70vh]">
+            {rooms.map((room) => (
+              <li
+                key={room.chatRoomId}
+                className={`p-2 rounded-lg cursor-pointer ${
+                  activeRoom.chatRoomId === room.chatRoomId
+                    ? "bg-blue-100"
+                    : "bg-gray-50 hover:bg-gray-100"
+                }`}
+                onClick={() => handleSetActiveRoom(room)}
+              >
+                <div className="flex items-center">
+                  <img
+                    src={room.icon}
+                    alt={room.name}
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                  <div>
+                    <h3 className="font-semibold">
+                      {room.name} ({room.population}/{room.capacity})
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {room.type_description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="userlist m-[1rem] min-w-[20vw]">
+          <h2 className="text-lg font-bold mb-4">Connected Users</h2>
+          <div className="thelist overflow-y-auto max-h-[70vh]">
+            {connectedUsers.length != 0 &&
+              connectedUsers.map((user, index) => (
+                <div
+                  key={index}
+                  className="flex items-center mb-2 p-2 bg-gray-50 rounded-lg"
+                >
+                  <ChatBubbleAvatar
+                    src={user.avatar}
+                    fallback={user.username[0].toUpperCase()}
+                  />
+                  <span className="font-medium">{user.username}</span>
+                </div>
+              ))}
+          </div>
+        </div>
       </div>
+
       {!activeRoom.chatRoomId ? (
         <div
           className="chat w-[60vw] h-[60vh] border-solid 
@@ -139,12 +183,12 @@ export default function Room() {
           Select room ...
         </div>
       ) : (
-        <div className="chat w-[60vw] h-[60vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white">
-          <div className="flex items-center justify-center p-4 border-b">
+        <div className="chat w-[60vw] max-h-[90vh] min-h-[90vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white flex flex-col">
+          <div className="flex items-center justify-center p-4 border-b h-[10%]">
             <ChatBubbleAvatar src={activeRoom.icon}></ChatBubbleAvatar>
             <h2 className="text-xl font-semibold">{activeRoom.name}</h2>
           </div>
-          <ChatMessageList>
+          <ChatMessageList className="h-auto">
             {messages.map((message, index) => {
               return (
                 <ChatBubble key={message.messageId} layout="ai">
@@ -158,7 +202,7 @@ export default function Room() {
             })}
           </ChatMessageList>
           <form
-            className="relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-1"
+            className=" relative rounded-lg border bg-background focus-within:ring-1 focus-within:ring-ring p-1"
             onSubmit={handleSendMessage}
           >
             <ChatInput

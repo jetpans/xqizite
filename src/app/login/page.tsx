@@ -30,6 +30,7 @@ import dataController from "@/lib/DataController";
 import { useUser } from "@/context/UserContext";
 import { API_URL } from "@/constants";
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
+import { useEffect } from "react";
 
 const formSchema = loginFormSchema;
 
@@ -106,6 +107,16 @@ export default function LoginPreview() {
     }
   };
 
+  useEffect(() => {
+    if (user !== null) {
+      const accessToken = localStorage.getItem("jwt");
+      if (accessToken === null) {
+        logout();
+      } else {
+      }
+      router.push("/room");
+    }
+  }, [user]);
   return (
     <div className="flex flex-col min-h-[50vh] h-full w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
@@ -135,7 +146,7 @@ export default function LoginPreview() {
                       <FormControl>
                         <Input
                           id="username"
-                          placeholder="johndoe@mail.com"
+                          placeholder="gamer123"
                           type="text"
                           autoComplete="text"
                           {...field}

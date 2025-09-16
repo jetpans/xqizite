@@ -1,0 +1,25 @@
+TASKS:
+
+HARD
+Figure out landing page?
+Fill database with questions.
+ChatGPT API hook for different answers.
+Add XP level to users
+User profile settings
+Admin panel with auth
+
+MEDIUM
+Implement a game loop.
+
+
+EASY
+
+
+
+COMPLETE
+
+Update room user count and users using socket.
+Display connected users on the right.
+Force login/guest login before seeing anything
+
+

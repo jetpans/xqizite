@@ -21,3 +21,4 @@ def verify_jwt(jwt):
         payload = decode_token(jwt)
     except:
         raise ValueError("Invalid JWT token")
+                                         

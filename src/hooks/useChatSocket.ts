@@ -16,9 +16,16 @@ interface UseChatSocketProps {
   token: string; // JWT
 }
 
+export interface UserInfo{
+  avatar: string;
+  username: string;
+}
+
 export default function useChatSocket({ token }: UseChatSocketProps) {
   const socketRef = useRef<Socket | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [connectedUsers, setConnectedUsers] = useState<UserInfo[]>([]);
+  const [userCounts, setUserCounts] = useState<{ [roomId: number]: number }>({});
   const [connected, setConnected] = useState<boolean>(false);
 
   useEffect(() => {
@@ -47,6 +54,17 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
       setMessages((prev) => [...prev, msg]);
     });
 
+    socketRef.current.on("update_user_counts", (counts: { [roomId: number]: number }) => {
+      console.log("Received user counts update:", counts);
+      setUserCounts(counts);
+    });
+
+    socketRef.current.on("update_connected_users", (users: UserInfo[]) => {
+      console.log("Received connected users update:", users);
+      setConnectedUsers(users);
+    });
+    
+
     return () => {
       socketRef.current?.disconnect();
     };
@@ -74,5 +92,7 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
     joinRoom,
     leaveRoom,
     sendMessage,
+    userCounts,
+    connectedUsers
   };
 }

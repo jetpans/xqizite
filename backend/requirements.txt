@@ -13,3 +13,5 @@ google-cloud-storage
 # firebase_config
 python-firebase
 flask_migrate
+flask_socketio
+psycopg2
