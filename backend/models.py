@@ -3,8 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from dotenv import load_dotenv
 from config import DevelopmentConfig, ProductionConfig
-from flask_migrate import migrate, init, upgrade, Migrate
+from flask_migrate import Migrate
 import uuid
+from datetime import datetime
 
 load_dotenv()
 app = Flask(__name__)
@@ -14,11 +15,12 @@ if env == 'production':
     app.config.from_object(ProductionConfig)
 else:
     app.config.from_object(DevelopmentConfig)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DB_CONNECT_URL_PROD")
 print(f"Using database URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
-db = SQLAlchemy(app)
 
-migrate = Migrate(app, db)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)  # Initialize Migrate properly
 
 
 class Account(db.Model):
@@ -31,6 +33,8 @@ class Account(db.Model):
     profileImage = db.Column(db.String(150))
     experience = db.Column(db.Integer, default=0)
     type = db.Column(db.String(20), default='user')  # e.g., 'user', 'admin', 'guest
+
+    messages = db.relationship('Message', backref='account', cascade="all, delete-orphan")
 
     def __init__(self, username=None, passwordHash=None, eMail=None, profileImage=None):
         if not passwordHash or not eMail:
@@ -52,6 +56,7 @@ class Question(db.Model):
 
     questionId = db.Column(db.Integer, primary_key=True)
     questionText = db.Column(db.String(500), nullable=False)
+    answers = db.relationship('Answer', backref='question', cascade="all, delete-orphan")
 
     def __init__(self, questionText):
         self.questionText = questionText
@@ -61,7 +66,7 @@ class Answer(db.Model):
     __tablename__ = 'answers'
 
     answerId = db.Column(db.Integer, primary_key=True)
-    questionId = db.Column(db.Integer, db.ForeignKey('questions.questionId'), nullable=False)
+    questionId = db.Column(db.Integer, db.ForeignKey('questions.questionId', ondelete='CASCADE'), nullable=False)
     answerText = db.Column(db.String(500), nullable=False)
 
     def __init__(self, questionId, answerText):
@@ -79,6 +84,9 @@ class ChatRoom(db.Model):
     description = db.Column(db.String(500))
     capacity = db.Column(db.Integer, nullable=False)
     activeQuestionId = db.Column(db.Integer, db.ForeignKey('questions.questionId'), nullable=True)
+
+    messages = db.relationship('Message', backref='chatroom', cascade="all, delete-orphan")
+    connected_users = db.relationship('UserChatRoom', backref='chatroom', cascade="all, delete-orphan")
 
     def __init__(self, name, typeId, capacity, description=None, icon=None):
         self.name = name
@@ -103,8 +111,10 @@ class ChatRoomType(db.Model):
 class UserChatRoom(db.Model):
     __tablename__ = 'user_chatroom'
 
-    accountId = db.Column(db.Integer, db.ForeignKey('accounts.accountId'), nullable=False, primary_key=True)
-    chatRoomId = db.Column(db.Integer, db.ForeignKey('chatrooms.chatRoomId'), nullable=False, primary_key=True)
+    accountId = db.Column(db.Integer, db.ForeignKey('accounts.accountId',
+                          ondelete='CASCADE'), nullable=False, primary_key=True)
+    chatRoomId = db.Column(db.Integer, db.ForeignKey('chatrooms.chatRoomId',
+                           ondelete='CASCADE'), nullable=False, primary_key=True)
 
     def __init__(self, accountId, chatRoomId):
         self.accountId = accountId
@@ -115,8 +125,8 @@ class Message(db.Model):
     __tablename__ = 'messages'
 
     messageId = db.Column(db.Integer, primary_key=True)
-    chatRoomId = db.Column(db.Integer, db.ForeignKey('chatrooms.chatRoomId'), nullable=False)
-    accountId = db.Column(db.Integer, db.ForeignKey('accounts.accountId'), nullable=False)
+    chatRoomId = db.Column(db.Integer, db.ForeignKey('chatrooms.chatRoomId', ondelete='CASCADE'), nullable=False)
+    accountId = db.Column(db.Integer, db.ForeignKey('accounts.accountId', ondelete='CASCADE'), nullable=False)
     content = db.Column(db.String(1000), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
 
@@ -140,11 +150,4 @@ def hello():
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        init()
-
-        # 2. Create a migration (like `flask db migrate -m "Initial migration"`)
-        migrate(message="Initial migration")
-
-        # 3. Apply the migration to the DB (like `flask db upgrade`)
-        upgrade()
+    app.run(debug=True)
