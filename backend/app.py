@@ -5,6 +5,7 @@ from flask_socketio import SocketIO
 from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, \
     unset_jwt_cookies, jwt_required, JWTManager
 from config import DevelopmentConfig, ProductionConfig
+from models import UserChatRoom
 from controllers.roomController import RoomController
 from controllers.chatController import ChatController
 from controllers.authController import AuthController
@@ -89,9 +90,15 @@ def refresh_expiring_jwts(response):
         return response
 
 
+
 authController = AuthController(app, db, bcrypt, jwt)
 chatController = ChatController(app, db, jwt, socketio)
 roomController = RoomController(app, db, jwt)
+
+
+with app.app_context():
+    db.session.query(UserChatRoom).delete()
+    db.session.commit()
 
 if __name__ == "__main__":
     socketio.run(app, debug=True, host="0.0.0.0", port=5000)

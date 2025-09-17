@@ -10,14 +10,15 @@ Admin panel with auth
 
 MEDIUM
 Implement a game loop.
-
+Polish login form
 
 EASY
-
+Make guest login provide username
 
 
 COMPLETE
 
+On server start disconnect everyone and invalidate jwt tokens and log everyone out
 Update room user count and users using socket.
 Display connected users on the right.
 Force login/guest login before seeing anything

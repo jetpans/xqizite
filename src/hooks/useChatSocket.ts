@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
+import { useUser } from "@/context/UserContext";
 
 // Types for incoming messages from the server
 export interface ChatMessage {
@@ -27,6 +28,8 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
   const [connectedUsers, setConnectedUsers] = useState<UserInfo[]>([]);
   const [userCounts, setUserCounts] = useState<{ [roomId: number]: number }>({});
   const [connected, setConnected] = useState<boolean>(false);
+  const { user, logout } = useUser();
+
 
   useEffect(() => {
     let token = localStorage.getItem("jwt");
@@ -38,6 +41,8 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
       auth: { token }, // Flask will get this from socket.handshake.auth.token
       transports: ["websocket"],
     });
+
+    // Check if 
 
     socketRef.current.on("connect", () => {
       console.log("Connected to chat socket");
@@ -64,6 +69,11 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
       setConnectedUsers(users);
     });
     
+    socketRef.current.on("invalid_token", () => {
+      console.error("Invalid token. Disconnecting socket.");
+      logout();
+      socketRef.current?.disconnect();
+    });
 
     return () => {
       socketRef.current?.disconnect();

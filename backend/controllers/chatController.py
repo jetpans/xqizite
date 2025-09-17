@@ -23,7 +23,12 @@ class ChatController(Controller):
     # Fetch token from socket like following socket.handshake.auth.token
     def connect(self, socket):
         token = socket["token"]
-        verify_jwt(token)
+        try:
+            verify_jwt(token)
+        except Exception as e:
+            print(f"Invalidation token because of exception {e}")
+            emit("invalid_token")
+            return
         user = get_user_from_jwt(token)
         session["username"] = user
         print(f"User {user} connected.")

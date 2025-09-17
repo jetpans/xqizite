@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 .vscode
+backend/data/trivia_full.csv
+backend/data/trivia.csv
+backend/tempCodeRunnerFile.py
