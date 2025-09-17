@@ -32,6 +32,7 @@ db = SQLAlchemy(app)
 
 if __name__ == "__main__":
     with app.app_context():
+        db.session.query(Question).delete()
         print("Starting to read CSV file...")
         data = pd.read_csv('data/trivia.csv')
 
@@ -85,14 +86,19 @@ if __name__ == "__main__":
                 print(e)
                 pass
 
-            if len(alternatives) > 0:
-                print("Alternatives for '{}': {}".format(answer, alternatives))
+            alternatives.add(answer)
+            try:
                 q = Question(question)
                 db.session.add(q)
                 db.session.flush()
-                answrs = [Answer(questionId=q.questionId, answerText=answer) for answer in alternatives]
-                db.session.add_all(answrs)
-                db.session.commit()
+                if len(alternatives) > 0:
+                    print("Alternatives for '{}': {}".format(answer, alternatives))
+                    
+                    answrs = [Answer(questionId=q.questionId, answerText=answer.lower()) for answer in alternatives]
+                    db.session.add_all(answrs)
+                    db.session.commit()
+            except:
+                pass
 
 
 
