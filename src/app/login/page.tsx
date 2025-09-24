@@ -30,9 +30,14 @@ import dataController from "@/lib/DataController";
 import { useUser } from "@/context/UserContext";
 import { API_URL } from "@/constants";
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const formSchema = loginFormSchema;
+const guestFormSchema = z.object({
+  guestname: z
+    .string()
+    .min(2, { message: "Username must be at least 2 characters." }),
+});
 
 export default function LoginPreview() {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,6 +45,13 @@ export default function LoginPreview() {
     defaultValues: {
       username: "",
       password: "",
+    },
+  });
+
+  const guestForm = useForm<z.infer<typeof guestFormSchema>>({
+    resolver: zodResolver(guestFormSchema),
+    defaultValues: {
+      guestname: "",
     },
   });
 
@@ -83,10 +95,13 @@ export default function LoginPreview() {
     }
   }
 
-  const handleGuestLogin = () => {
+  async function onGuestSubmit(values: z.infer<typeof guestFormSchema>) {
     try {
-      let loginData = {
+      // Assuming an async login function
+      console.log(values);
+      const loginData = {
         guest: true,
+        username: values.guestname,
       };
       dc.PostData(API_URL + "/login", loginData)
         .then((response) => {
@@ -101,11 +116,16 @@ export default function LoginPreview() {
         .catch((response) => {
           toast.error("Login failed. Please check your credentials.");
         });
+      toast(
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+        </pre>
+      );
     } catch (error) {
-      console.error("Guest login error", error);
-      toast.error("Failed to login as guest.");
+      console.error("Form submission error", error);
+      toast.error("Failed to submit the form. Please try again.");
     }
-  };
+  }
 
   useEffect(() => {
     if (user !== null) {
@@ -120,17 +140,48 @@ export default function LoginPreview() {
   return (
     <div className="flex flex-col min-h-[50vh] h-full w-full items-center justify-center px-4">
       <Card className="mx-auto max-w-sm">
-        <Button
-          className="text-2xl bg-slate-950 text-white rounded-lg m-2"
-          onClick={handleGuestLogin}
-        >
-          Continue as guest
-        </Button>
+        <CardContent>
+          <Form {...guestForm}>
+            <form
+              onSubmit={guestForm.handleSubmit(onGuestSubmit)}
+              className="space-y-8"
+            >
+              <div className="grid gap-4">
+                <FormField
+                  control={guestForm.control}
+                  name="guestname"
+                  render={({ field }) => (
+                    <FormItem className="grid gap-2">
+                      <FormLabel htmlFor="guestname">Guest username</FormLabel>
+                      <FormControl>
+                        <Input
+                          id="guestname"
+                          placeholder="gamer123"
+                          type="text"
+                          autoComplete="text"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Continue as Guest
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
 
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>
-            Enter your email and password to login to your account.
+            Enter your username and password to login to your account.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -162,7 +213,9 @@ export default function LoginPreview() {
                   render={({ field }) => (
                     <FormItem className="grid gap-2">
                       <div className="flex justify-between items-center">
-                        <FormLabel htmlFor="password">Password</FormLabel>
+                        <FormLabel htmlFor="password" className="mr-[1rem]">
+                          Password
+                        </FormLabel>
                         <Link
                           href="#"
                           className="ml-auto inline-block text-sm underline"

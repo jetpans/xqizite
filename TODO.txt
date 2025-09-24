@@ -19,12 +19,12 @@ Report a bug form
 
 EASY
 Add timeleft to question.
-Make guest login provide username
 Style correct message
 
 
 COMPLETE
 
+Make guest login provide username
 Implement a game loop.
 Fill database with questions.
 On server start disconnect everyone and invalidate jwt tokens and log everyone out

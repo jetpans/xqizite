@@ -5,7 +5,7 @@ from flask_socketio import SocketIO
 from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, \
     unset_jwt_cookies, jwt_required, JWTManager
 from config import DevelopmentConfig, ProductionConfig
-from models import UserChatRoom
+from models import UserChatRoom,Account
 from controllers.roomController import RoomController
 from controllers.chatController import ChatController
 from controllers.authController import AuthController
@@ -103,6 +103,7 @@ game_thread.start()
 
 with app.app_context():
     db.session.query(UserChatRoom).delete()
+    db.session.query(Account).filter_by(type="guest").delete()
     db.session.commit()
 
 if __name__ == "__main__":

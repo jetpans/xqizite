@@ -131,6 +131,10 @@ export default function Room() {
                   activeRoom.chatRoomId === room.chatRoomId
                     ? "bg-blue-100"
                     : "bg-gray-50 hover:bg-gray-100"
+                }
+                ${
+                  activeRoom.chatRoomId === room.chatRoomId &&
+                  "pointer-events-none"
                 }`}
                 onClick={() => handleSetActiveRoom(room)}
               >

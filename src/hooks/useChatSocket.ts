@@ -83,8 +83,8 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
       setActiveQuestion(question ? question : null);
     });
     
-    socketRef.current.on("invalid_token", () => {
-      console.error("Invalid token. Disconnecting socket.");
+    socketRef.current.on("invalid_token", (msg: string | null) => {
+      alert("Disconnecting because of Logon error: "+ msg);
       logout();
       socketRef.current?.disconnect();
     });

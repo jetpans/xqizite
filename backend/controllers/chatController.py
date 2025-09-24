@@ -14,6 +14,7 @@ class ChatController(Controller):
         self.socketio = socketio
         self.db = db
         self.game_controller = game_controller
+        self.denied_users = set()
 
         self.socketio.on_event("connect", self.connect)
         self.socketio.on_event("disconnect", self.disconnect)
@@ -28,17 +29,31 @@ class ChatController(Controller):
             verify_jwt(token)
         except Exception as e:
             print(f"Invalidation token because of exception {e}")
-            emit("invalid_token")
+            emit("invalid_token", "Invalid token, disconnecting.")
             return
         user = get_user_from_jwt(token)
+
         session["username"] = user
+        session["sid"] = request.sid
+
+        acc = self.db.session.query(Account).filter_by(username=user).first()
+        connections = self.db.session.query(UserChatRoom).filter_by(accountId=acc.accountId).all()
+        if connections:
+            # Deny connection
+            emit("invalid_token", "Already connected from another device.")
+            self.denied_users.add(session["sid"])
+            return
+
         print(f"User {user} connected.")
         room_counts = self.get_room_counts()
         emit("update_user_counts", room_counts)
 
     def disconnect(self):
         user = session.get("username")
-
+        if session["sid"] in self.denied_users:
+            self.denied_users.remove(session["sid"])
+            print(f"Denied connection for {user}.")
+            return
         account = self.db.session.query(Account).filter_by(username=user).first()
         rooms = self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).all()
         connected_to_rooms = []
@@ -47,6 +62,8 @@ class ChatController(Controller):
             connected_to_rooms.append(room.chatRoomId)
 
         self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).delete()
+        if account.type == 'guest':
+            self.db.session.delete(account)
         self.db.session.commit()
         room_counts = self.get_room_counts()
         emit("update_user_counts", room_counts, broadcast=True)
@@ -63,6 +80,9 @@ class ChatController(Controller):
 
         to_room = data.get("chatRoomId")
         account = self.db.session.query(Account).filter_by(username=user).first()
+        connected_to = self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).first()
+
+        # If already connected to a room throw error
 
         new_connection = UserChatRoom(
             accountId=account.accountId,
@@ -84,6 +104,7 @@ class ChatController(Controller):
 
     def leave_chatroom(self, data):
         user = session.get("username")
+
         account = self.db.session.query(Account).filter_by(username=user).first()
         self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).delete()
         self.db.session.commit()

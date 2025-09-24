@@ -49,7 +49,10 @@ class AuthController(Controller):
     def login(self):
         data = request.get_json()
         if data.get("guest", False):
-            myUser = Account()
+            acc = self.db.session.query(Account).filter_by(username=data["username"]).first()
+            if acc:
+                return {"success": False, "data": "Username already in use."}
+            myUser = Account(username=data["username"])
             access_token = create_access_token(identity=myUser.username, additional_claims={
             }, expires_delta=timedelta(hours=1))
             user = {

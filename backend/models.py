@@ -36,12 +36,12 @@ class Account(db.Model):
 
     messages = db.relationship('Message', backref='account', cascade="all, delete-orphan")
 
-    def __init__(self, username=None, passwordHash=None, eMail=None, profileImage=None):
+    def __init__(self, username, passwordHash=None, eMail=None, profileImage=None):
         if not passwordHash or not eMail:
             passwordHash = None
             eMail = None
             profileImage = None
-            self.username = f"guest{uuid.uuid4().hex[:8]}"
+            self.username = username
             self.type = 'guest'
         else:
             self.username = username
