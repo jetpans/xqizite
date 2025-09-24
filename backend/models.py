@@ -30,24 +30,24 @@ class Account(db.Model):
     username = db.Column(db.String(20), nullable=False, unique=True)
     passwordHash = db.Column(db.String(72), nullable=True)
     eMail = db.Column(db.String(200), nullable=True)
-    profileImage = db.Column(db.String(150))
+    avatar = db.Column(db.String(500))
     experience = db.Column(db.Integer, default=0)
     type = db.Column(db.String(20), default='user')  # e.g., 'user', 'admin', 'guest
 
     messages = db.relationship('Message', backref='account', cascade="all, delete-orphan")
 
-    def __init__(self, username, passwordHash=None, eMail=None, profileImage=None):
+    def __init__(self, username, passwordHash=None, eMail=None, avatar=None):
         if not passwordHash or not eMail:
-            passwordHash = None
-            eMail = None
-            profileImage = None
+            self.passwordHash = None
+            self.eMail = None
+            self.avatar = avatar
             self.username = username
             self.type = 'guest'
         else:
             self.username = username
             self.passwordHash = passwordHash
             self.eMail = eMail
-            self.profileImage = profileImage
+            self.avatar = avatar
             self.type = 'user'
 
 

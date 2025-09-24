@@ -31,6 +31,7 @@ import { useUser } from "@/context/UserContext";
 import { API_URL } from "@/constants";
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
 import { useEffect, useState } from "react";
+import { randomAvatar } from "@/lib/utils";
 
 const formSchema = loginFormSchema;
 const guestFormSchema = z.object({
@@ -54,6 +55,10 @@ export default function LoginPreview() {
       guestname: "",
     },
   });
+
+  const [randomAvatarUrl, setRandomAvatarUrl] = useState<string>(
+    "https://avataaars.io/?avatarStyle=Circle&topType=Hat&accessoriesType=Sunglasses&facialHairType=MoustacheFancy&facialHairColor=Brown&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Grimace&skinColor=Pale"
+  );
 
   const router = useRouter();
 
@@ -102,6 +107,7 @@ export default function LoginPreview() {
       const loginData = {
         guest: true,
         username: values.guestname,
+        avatar: randomAvatarUrl,
       };
       dc.PostData(API_URL + "/login", loginData)
         .then((response) => {
@@ -138,8 +144,8 @@ export default function LoginPreview() {
     }
   }, [user]);
   return (
-    <div className="flex flex-col min-h-[50vh] h-full w-full items-center justify-center px-4">
-      <Card className="mx-auto max-w-sm">
+    <div className="min-h-[50vh] h-full w-full px-4 flex flex-row items-center justify-center gap-[10vw] flex-wrap py-8">
+      <Card className="">
         <CardContent>
           <Form {...guestForm}>
             <form
@@ -176,8 +182,19 @@ export default function LoginPreview() {
               </div>
             </form>
           </Form>
-        </CardContent>
-
+          <div className="avatar-picker flex flex-col items-center mt-6">
+            <img
+              src={randomAvatarUrl}
+              alt="Random Avatar"
+              className="w-32 h-32 rounded-full mx-auto mb-4 border border-gray-300"
+            />
+            <Button onClick={() => setRandomAvatarUrl(randomAvatar())}>
+              Randomize
+            </Button>
+          </div>
+        </CardContent>{" "}
+      </Card>
+      <Card className="">
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
           <CardDescription>

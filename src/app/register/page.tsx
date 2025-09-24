@@ -26,13 +26,13 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 
 import { registerFormSchema } from "@/lib/validation-schemas";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import dataController from "@/lib/DataController";
 import { API_URL } from "@/constants";
 const formSchema = registerFormSchema;
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
-
+import { randomAvatar } from "@/lib/utils";
 export default function RegisterPreview() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,7 +43,9 @@ export default function RegisterPreview() {
       confirmPassword: "",
     },
   });
-
+  const [randomAvatarUrl, setRandomAvatarUrl] = useState(
+    "https://avataaars.io/?avatarStyle=Circle&topType=Hat&accessoriesType=Sunglasses&facialHairType=MoustacheFancy&facialHairColor=Brown&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Grimace&skinColor=Pale"
+  );
   const router = useRouter();
 
   const dc = new dataController();
@@ -57,6 +59,7 @@ export default function RegisterPreview() {
         username: values.username,
         email: values.email,
         password: values.password,
+        avatar: randomAvatarUrl,
       };
 
       console.log("Wanted path is: ", API_URL + "/register");
@@ -97,8 +100,8 @@ export default function RegisterPreview() {
   }, [user]);
 
   return (
-    <div className="flex min-h-[60vh] h-full w-full items-center justify-center px-4">
-      <Card className="mx-auto max-w-sm">
+    <div className="flex min-h-[60vh] h-full w-full items-center justify-center px-4 gap-[10vw]">
+      <Card className="">
         <CardHeader>
           <CardTitle className="text-2xl">Register</CardTitle>
           <CardDescription>
@@ -198,6 +201,21 @@ export default function RegisterPreview() {
             <Link href="/login" className="underline">
               Login
             </Link>
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="">
+        <CardContent>
+          <CardTitle className="text-2xl">Choose avatar</CardTitle>
+          <div className="avatar-picker flex flex-col items-center mt-6">
+            <img
+              src={randomAvatarUrl}
+              alt="Random Avatar"
+              className="w-32 h-32 rounded-full mx-auto mb-4 border border-gray-300"
+            />
+            <Button onClick={() => setRandomAvatarUrl(randomAvatar())}>
+              Randomize
+            </Button>
           </div>
         </CardContent>
       </Card>

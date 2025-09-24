@@ -38,7 +38,7 @@ class AuthController(Controller):
         if result == "OK":
             passwordHash = self.bcrypt.generate_password_hash(data["password"]).decode("utf-8")
             f = data
-            newAcc = Account(f["username"], passwordHash, f["email"])
+            newAcc = Account(f["username"], passwordHash, f["email"], avatar=f.get("avatar", None))
             self.db.session.add(newAcc)
             self.db.session.commit()
             self.db.session.commit()
@@ -52,12 +52,14 @@ class AuthController(Controller):
             acc = self.db.session.query(Account).filter_by(username=data["username"]).first()
             if acc:
                 return {"success": False, "data": "Username already in use."}
-            myUser = Account(username=data["username"])
+            myUser = Account(username=data["username"], avatar=data.get("avatar", None))
+            print("Guest login, avatar:", data.get("avatar", None))
             access_token = create_access_token(identity=myUser.username, additional_claims={
             }, expires_delta=timedelta(hours=1))
             user = {
                 "id": myUser.accountId,
                 "username": myUser.username,
+                "avatar": myUser.avatar,
                 "email": myUser.eMail,
             }
 

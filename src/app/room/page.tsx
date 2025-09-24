@@ -193,7 +193,7 @@ export default function Room() {
             <ChatBubbleAvatar src={activeRoom.icon}></ChatBubbleAvatar>
             <h2 className="text-xl font-semibold">{activeRoom.name}</h2>
           </div>
-          <div className="question p-4 border-b h-[10%] bg-gray-100 flex flex-col gap-3 items-center justify-center">
+          <div className="question p-4 border-b  bg-gray-100 flex flex-col gap-3 items-center justify-center">
             <h3 className="questiontext text-lg font-medium">
               {activeQuestion
                 ? `${activeQuestion.question}`
@@ -216,6 +216,7 @@ export default function Room() {
                     src={message.avatar}
                     fallback={message.username[0].toUpperCase()}
                   />
+
                   {message.isCorrect ? (
                     <ChatBubbleMessage className="bg-green-100">
                       {message.message}

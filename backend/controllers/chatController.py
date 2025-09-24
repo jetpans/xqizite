@@ -147,6 +147,7 @@ class ChatController(Controller):
         emit("message_from_server", {
             "username": user,
             "message": message,
+            "avatar": account.avatar,
             "timestamp": timestamp,
             "messageId": the_message.messageId,
             'isCorrect': correct_answer
@@ -165,7 +166,7 @@ class ChatController(Controller):
     def get_connected_users(self, room_id):
         stmt = self.db.session.query(
             Account.username,
-            Account.profileImage
+            Account.avatar
         ).join(UserChatRoom, Account.accountId == UserChatRoom.accountId
         ).filter(UserChatRoom.chatRoomId == room_id).all()
 
