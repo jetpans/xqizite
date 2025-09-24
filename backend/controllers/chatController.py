@@ -9,10 +9,11 @@ from util import verify_jwt, get_user_from_jwt
 
 
 class ChatController(Controller):
-    def __init__(self, app, db, jwt, socketio):
+    def __init__(self, app, db, jwt, socketio, game_controller):
         super().__init__(app, db, jwt)
         self.socketio = socketio
         self.db = db
+        self.game_controller = game_controller
 
         self.socketio.on_event("connect", self.connect)
         self.socketio.on_event("disconnect", self.disconnect)
@@ -76,6 +77,7 @@ class ChatController(Controller):
         room_counts = self.get_room_counts()
         emit("update_user_counts", room_counts, broadcast=True)
         emit("update_connected_users", self.get_connected_users(data.get("chatRoomId")), room=data.get("chatRoomId"))
+        emit("update_question", self.game_controller.room_latest_updates.get(to_room, {}), room=to_room)
 
 
         print(f"Client connected: {user} to room {to_room}")
@@ -116,12 +118,17 @@ class ChatController(Controller):
 
         self.db.session.commit()
 
+        correct_answer = self.game_controller.process_message(room, user, message)
+
+        if correct_answer:
+            message = "Correct!"
         print(f"Message from {user} in room {room}: {message}")
         emit("message_from_server", {
             "username": user,
             "message": message,
             "timestamp": timestamp,
-            "messageId": the_message.messageId
+            "messageId": the_message.messageId,
+            'isCorrect': correct_answer
 
         }, room=room)
 

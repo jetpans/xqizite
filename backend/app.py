@@ -9,6 +9,8 @@ from models import UserChatRoom
 from controllers.roomController import RoomController
 from controllers.chatController import ChatController
 from controllers.authController import AuthController
+from controllers.gameController import GameController
+
 from flask import Flask, jsonify, request, render_template, redirect, session
 from flask_bcrypt import Bcrypt
 from flask_sqlalchemy import SQLAlchemy
@@ -16,7 +18,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta, timezone
 import os
 import json
-
+import threading
 
 
 
@@ -92,9 +94,12 @@ def refresh_expiring_jwts(response):
 
 
 authController = AuthController(app, db, bcrypt, jwt)
-chatController = ChatController(app, db, jwt, socketio)
+gameController = GameController(app, db, socketio,jwt)
+chatController = ChatController(app, db, jwt, socketio, gameController)
 roomController = RoomController(app, db, jwt)
 
+game_thread = threading.Thread(target=gameController.game_loop, daemon=True)
+game_thread.start()
 
 with app.app_context():
     db.session.query(UserChatRoom).delete()

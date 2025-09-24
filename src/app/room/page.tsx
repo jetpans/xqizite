@@ -40,6 +40,7 @@ export default function Room() {
     sendMessage,
     userCounts,
     connectedUsers,
+    activeQuestion,
   } = useChatSocket({ token: user?.token || "" });
 
   // const [messages, setMessages] = useState([
@@ -188,6 +189,21 @@ export default function Room() {
             <ChatBubbleAvatar src={activeRoom.icon}></ChatBubbleAvatar>
             <h2 className="text-xl font-semibold">{activeRoom.name}</h2>
           </div>
+          <div className="question p-4 border-b h-[10%] bg-gray-100 flex flex-col gap-3 items-center justify-center">
+            <h3 className="questiontext text-lg font-medium">
+              {activeQuestion
+                ? `${activeQuestion.question}`
+                : "Waiting for the next question..."}
+            </h3>
+
+            <div className="ml-4 p-1 bg-yellow-200 rounded-md text-lg font-medium whitespace-pre">
+              {activeQuestion?.answer
+                ? 'Answer was "' + activeQuestion.answer + '"'
+                : activeQuestion?.clue
+                ? `${activeQuestion.clue}`
+                : "?"}
+            </div>
+          </div>
           <ChatMessageList className="h-auto">
             {messages.map((message, index) => {
               return (
@@ -196,7 +212,13 @@ export default function Room() {
                     src={message.avatar}
                     fallback={message.username[0].toUpperCase()}
                   />
-                  <ChatBubbleMessage>{message.message}</ChatBubbleMessage>
+                  {message.isCorrect ? (
+                    <ChatBubbleMessage className="bg-green-100">
+                      {message.message}
+                    </ChatBubbleMessage>
+                  ) : (
+                    <ChatBubbleMessage>{message.message}</ChatBubbleMessage>
+                  )}
                 </ChatBubble>
               );
             })}

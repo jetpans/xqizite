@@ -57,9 +57,11 @@ class Question(db.Model):
     questionId = db.Column(db.Integer, primary_key=True)
     questionText = db.Column(db.String(500), nullable=False)
     answers = db.relationship('Answer', backref='question', cascade="all, delete-orphan")
+    example_answer = db.Column(db.String(500), nullable=False)
 
-    def __init__(self, questionText):
+    def __init__(self, questionText, example_answer):
         self.questionText = questionText
+        self.example_answer = example_answer
 
 
 class Answer(db.Model):
@@ -87,6 +89,7 @@ class ChatRoom(db.Model):
 
     messages = db.relationship('Message', backref='chatroom', cascade="all, delete-orphan")
     connected_users = db.relationship('UserChatRoom', backref='chatroom', cascade="all, delete-orphan")
+    type = db.relationship('ChatRoomType', backref='chatrooms')
 
     def __init__(self, name, typeId, capacity, description=None, icon=None):
         self.name = name
@@ -102,10 +105,12 @@ class ChatRoomType(db.Model):
     typeId = db.Column(db.Integer, primary_key=True)
     typeName = db.Column(db.String(50), nullable=False, unique=True)
     description = db.Column(db.String(200))
+    config = db.Column(db.JSON, nullable=True)  # JSON field for additional configurations
 
-    def __init__(self, typeName, description=None):
+    def __init__(self, typeName, description=None, config=None):
         self.typeName = typeName
         self.description = description
+        self.config = config
 
 
 class UserChatRoom(db.Model):

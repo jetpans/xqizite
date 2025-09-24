@@ -12,6 +12,15 @@ avatar: string;
   timestamp: string;
 }
 
+export interface Question {
+  roomId: number;
+  question: string;
+  answer: string;
+  clue: string;
+  timeStarted: string;
+  timeLimit: number;
+}
+
 // Props passed into the hook
 interface UseChatSocketProps {
   token: string; // JWT
@@ -28,6 +37,7 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
   const [connectedUsers, setConnectedUsers] = useState<UserInfo[]>([]);
   const [userCounts, setUserCounts] = useState<{ [roomId: number]: number }>({});
   const [connected, setConnected] = useState<boolean>(false);
+  const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const { user, logout } = useUser();
 
 
@@ -68,6 +78,10 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
       console.log("Received connected users update:", users);
       setConnectedUsers(users);
     });
+    socketRef.current.on("update_question", (question: Question | null) => {
+      console.log("Received question update:", question);
+      setActiveQuestion(question ? question : null);
+    });
     
     socketRef.current.on("invalid_token", () => {
       console.error("Invalid token. Disconnecting socket.");
@@ -103,6 +117,7 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
     leaveRoom,
     sendMessage,
     userCounts,
-    connectedUsers
+    connectedUsers,
+    activeQuestion,
   };
 }
