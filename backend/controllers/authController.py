@@ -26,9 +26,9 @@ class AuthController(Controller):
 
         self.email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
         self.password_regex = "^(?=.*?[a-z])(?=.*?[0-9]).{6,}$"
+        self.username_regex = r"^[A-Za-z0-9]{6,}$"
         self.REGISTER_REQUIRED_FIELDS = ["email", "username", "password"]
         self.LOGIN_REQUIRED_FIELDS = ["email", "username", "password", "roleId", "profileImage", ]
-        self.username_range = (6, 20)
 
     @jwt_required()
     def update(self):
@@ -53,13 +53,13 @@ class AuthController(Controller):
             return {"success": False, "data": "User not found."}
         acc.avatar = new_avatar
         self.db.session.commit()
-        print(f"Updated avatar for user {user} to {new_avatar}")
+        # print(f"Updated avatar for user {user} to {new_avatar}")
         return {"success": True, "data": "Profile updated."}
 
     def register(self):
         data = request.get_json()
         result = self.testRegForm(data)
-        print(f"Result is {data}")
+        # print(f"Result is {data}")
         if result == "OK":
             passwordHash = self.bcrypt.generate_password_hash(data["password"]).decode("utf-8")
             f = data
@@ -85,7 +85,7 @@ class AuthController(Controller):
                 if not data["avatar"].startswith("https://avataaars.io"):
                     return {"success": False, "data": "Avatar must be a valid URL."}
             myUser = Account(username=data["username"], avatar=data.get("avatar", None))
-            print("Guest login, avatar:", data.get("avatar", None))
+            # print("Guest login, avatar:", data.get("avatar", None))
             access_token = create_access_token(identity=myUser.username, additional_claims={
             }, expires_delta=timedelta(hours=1))
             user = {
@@ -146,7 +146,7 @@ class AuthController(Controller):
         if not re.match(self.password_regex, form["password"]):
             return {"success": False, "data": "Password is bad."}
 
-        if len(form["username"]) < self.username_range[0] or len(form["username"]) > self.username_range[1]:
+        if not re.match(self.username_regex, form["username"]):
             return {"success": False, "data": "Username is too short or too long."}
 
         if form["username"] in list(map(lambda x: x[0], self.db.session.query(Account.username).all())):

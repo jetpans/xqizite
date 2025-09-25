@@ -250,7 +250,7 @@ export default function Room() {
           >
             <ChatInput
               placeholder="Type your message here..."
-              className="h-[2rem] resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0"
+              className="h-[2rem] !text-lg resize-none rounded-lg bg-background border-0 p-3 shadow-none focus-visible:ring-0 "
               value={inputValue} // Added controlled input
               onChange={(e) => setInputValue(e.target.value)} // Added onChange handler
               onKeyDown={(e) => {

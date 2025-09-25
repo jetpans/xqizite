@@ -190,7 +190,7 @@ export default function LoginPreview() {
               Randomize
             </Button>
           </div>
-        </CardContent>{" "}
+        </CardContent>
       </Card>
       <Card className="">
         <CardHeader>
@@ -253,7 +253,7 @@ export default function LoginPreview() {
                 <Button type="submit" className="w-full">
                   Login
                 </Button>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" disabled>
                   Login with Google
                 </Button>
               </div>

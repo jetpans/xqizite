@@ -55,8 +55,8 @@ export default function Home() {
     }
   }, [user]);
   return (
-    <div className="p-4 flex flex-row justify-center items-start min-h-screen flex-wrap">
-      <Card className="max-w-md mx-auto mt-10 flex flex-row items-center justify-center">
+    <div className="p-4 flex flex-row justify-center items-start min-h-screen flex-wrap gap-8">
+      <Card className="max-w-md mt-10 flex flex-row items-center justify-center">
         <CardContent>
           <CardTitle className="text-2xl text-center">Choose avatar</CardTitle>
           <div className="avatar-picker flex flex-col items-center mt-6">
@@ -78,7 +78,7 @@ export default function Home() {
             const url = buildAvatarUrl(opts);
             setCurrentAvatar(url);
           }}
-          className="max-w-md mx-auto mt-10"
+          className="max-w-md  mt-10"
           onSubmit={handleSubmit}
         />
       )}

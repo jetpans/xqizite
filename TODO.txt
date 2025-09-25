@@ -2,8 +2,9 @@ TASKS:
 
 HARD
 Figure out landing page?
-User profile settings (username avatar password)
-Implement avatar editor
+
+Build and deploy pipeline
+
 ChatGPT API hook for different answers.
 Add XP level to users
 Submit question page
@@ -16,6 +17,7 @@ Admin panel with auth
 MEDIUM
 Polish login form
 Report a bug form
+User profile settings (password)
 
 EASY
 Add timeleft to question.
@@ -24,6 +26,7 @@ Style correct message
 
 COMPLETE
 
+Implement avatar editor
 Make guest login provide username
 Implement a game loop.
 Fill database with questions.

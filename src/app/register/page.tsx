@@ -31,9 +31,35 @@ import { useEffect, useState } from "react";
 import { useUser } from "@/context/UserContext";
 import dataController from "@/lib/DataController";
 import { API_URL } from "@/constants";
-const formSchema = registerFormSchema;
+// const formSchema = registerFormSchema;
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
 import { randomAvatar } from "@/lib/utils";
+
+const formSchema = z.object({
+   username: z
+    .string()
+    .regex(
+      /^[A-Za-z0-9]{6,}$/,
+      "Username must be at least 6 characters long and contain only letters and numbers"
+    ),
+  email: z
+    .string()
+    .email("Invalid email address")
+    .regex(
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,7}\b/,
+      "Invalid email format"
+    ),
+  password: z
+    .string()
+    .regex(
+      /^(?=.*?[a-z])(?=.*?[0-9]).{6,}$/,
+      "Password must be at least 6 characters long, contain at least one lowercase letter and one number"
+    ),
+  confirmPassword: z.string(),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 export default function RegisterPreview() {
   const form = useForm<z.infer<typeof formSchema>>({

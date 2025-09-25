@@ -1,111 +1,328 @@
 "use client";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+
+import Link from "next/link";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+
+import { loginFormSchema } from "@/lib/validation-schemas";
+import dataController from "@/lib/DataController";
+import { useUser } from "@/context/UserContext";
+import { API_URL } from "@/constants";
+import { useRouter } from "next/navigation"; // Use Next.js router for navigation
+import { useEffect, useState } from "react";
+import { randomAvatar, defaultAvatar } from "@/lib/utils";
+
+const formSchema = loginFormSchema;
+const guestFormSchema = z.object({
+  guestname: z
+    .string()
+    .min(2, { message: "Username must be at least 2 characters." }),
+});
 
 export default function Home() {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  const guestForm = useForm<z.infer<typeof guestFormSchema>>({
+    resolver: zodResolver(guestFormSchema),
+    defaultValues: {
+      guestname: "",
+    },
+  });
+
+  const [randomAvatarUrl, setRandomAvatarUrl] = useState<string>(defaultAvatar);
+
   const router = useRouter();
+
+  const dc = new dataController();
+  // Assuming useUser is a custom hook that provides user context
+  const { user, login, logout } = useUser();
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      // Assuming an async login function
+      console.log(values);
+      const loginData = {
+        username: values.username,
+        password: values.password,
+      };
+
+      dc.PostData(API_URL + "/login", loginData)
+        .then((response) => {
+          if (response.success === true && response.data.success === true) {
+            localStorage.setItem("jwt", response.data.data.access_token);
+            login(response.data.data.user);
+            router.push("/room");
+          } else {
+            toast.error("Login failed. Please check your credentials.");
+          }
+        })
+        .catch((response) => {
+          toast.error("Login failed. Please check your credentials.");
+        });
+
+      toast(
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+        </pre>
+      );
+    } catch (error) {
+      console.error("Form submission error", error);
+      toast.error("Failed to submit the form. Please try again.");
+    }
+  }
+
+  async function onGuestSubmit(values: z.infer<typeof guestFormSchema>) {
+    try {
+      // Assuming an async login function
+      console.log(values);
+      const loginData = {
+        guest: true,
+        username: values.guestname,
+        avatar: randomAvatarUrl,
+      };
+      dc.PostData(API_URL + "/login", loginData)
+        .then((response) => {
+          if (response.success === true && response.data.success === true) {
+            localStorage.setItem("jwt", response.data.data.access_token);
+            login(response.data.data.user);
+            router.push("/room");
+          } else {
+            toast.error("Login failed. Please check your credentials.");
+          }
+        })
+        .catch((response) => {
+          toast.error("Login failed. Please check your credentials.");
+        });
+      toast(
+        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
+        </pre>
+      );
+    } catch (error) {
+      console.error("Form submission error", error);
+      toast.error("Failed to submit the form. Please try again.");
+    }
+  }
+
   useEffect(() => {
-    router.push("/room");
-  }, []);
+    if (user !== null) {
+      const accessToken = localStorage.getItem("jwt");
+      if (accessToken === null) {
+        logout();
+      } else {
+      }
+    }
+  }, [user]);
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 sm:p-8 h-auto">
+      <Card className=" p-8 sm:p-16 text-center">
+        <CardTitle className="text-4xl font-bold mb-4">
+          Welcome to XQZite
+        </CardTitle>
+        <CardContent className="text-lg text-gray-700">
+          Your ultimate platform for engaging quizzes and interactive trivia.
+          Dive into a world of fun and knowledge with XQZite! Made by jetpans.
+          <br />
+          <br />
+          <div>
+            <ul className="list-disc text-left">
+              <li>Show your trivia knowledge to other users.</li>
+              <li>Have a fun experience with your friends.</li>
+              <li>Express yourself by designing your own avatar (new!).</li>
+              <li>Progress and get special rewards (upcoming).</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+      {!user && (
+        <>
+          <Card className="">
+            <CardContent>
+              <Form {...guestForm}>
+                <form
+                  onSubmit={guestForm.handleSubmit(onGuestSubmit)}
+                  className="space-y-8"
+                >
+                  <div className="grid gap-4">
+                    <FormField
+                      control={guestForm.control}
+                      name="guestname"
+                      render={({ field }) => (
+                        <FormItem className="grid gap-2">
+                          <FormLabel htmlFor="guestname" className="text-2xl">
+                            Guest username
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              id="guestname"
+                              placeholder="gamer123"
+                              type="text"
+                              autoComplete="text"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <Button
+                      type="submit"
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      Continue as Guest
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+              <div className="avatar-picker flex flex-col items-center mt-6">
+                <img
+                  src={randomAvatarUrl}
+                  alt="Random Avatar"
+                  className="w-32 h-32 rounded-full mx-auto mb-4 border border-gray-300"
+                />
+                <Button onClick={() => setRandomAvatarUrl(randomAvatar())}>
+                  Randomize
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="">
+            <CardHeader>
+              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardDescription>
+                Enter your username and password to login to your account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-8"
+                >
+                  <div className="grid gap-4">
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem className="grid gap-2">
+                          <FormLabel htmlFor="username">Username</FormLabel>
+                          <FormControl>
+                            <Input
+                              id="username"
+                              placeholder="gamer123"
+                              type="text"
+                              autoComplete="text"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem className="grid gap-2">
+                          <div className="flex justify-between items-center">
+                            <FormLabel htmlFor="password" className="mr-[1rem]">
+                              Password
+                            </FormLabel>
+                            <Link
+                              href="#"
+                              className="ml-auto inline-block text-sm underline"
+                            >
+                              Forgot your password?
+                            </Link>
+                          </div>
+                          <FormControl>
+                            <PasswordInput
+                              id="password"
+                              placeholder="******"
+                              autoComplete="current-password"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full">
+                      Login
+                    </Button>
+                    <Button variant="outline" className="w-full" disabled>
+                      Login with Google
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+              <div className="mt-4 text-center text-sm">
+                Don&apos;t have an account?{" "}
+                <Link href="/register" className="underline">
+                  Sign up
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
+      <Card className="p-2 sm:p-8 text-center">
+        <CardTitle className="text-2xl font-bold mb-1">
+          Upcoming Features
+        </CardTitle>
+        <CardContent className="text-lg text-gray-700">
+          <ul className="list-disc list-inside space-y-2">
+            <li>Progression: Rewards for doing well.</li>
+            <li>Community questions: Submit your own questions for rewards.</li>
+            <li>Profile customization: More options to express yourself.</li>
+            <li>Style rework: New look for the new app.</li>
+          </ul>
+        </CardContent>
+      </Card>
+      <Card className="p-2 sm:p-8 text-center">
+        <CardTitle className="text-2xl font-bold mb-1">
+          Check out the code
+        </CardTitle>
+        <CardContent className="text-lg text-gray-700 flex justify-center items-center">
+          <a href="https://github.com/jetpans/xqizite">
+            <img
+              src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png"
+              alt="GitHub Logo"
+              className="w-48 h-48"
             />
-            Deploy now
           </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </CardContent>
+      </Card>
     </div>
   );
 }

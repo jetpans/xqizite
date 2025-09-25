@@ -89,6 +89,7 @@ export default function useChatSocket({ token }: UseChatSocketProps) {
       socketRef.current?.disconnect();
     });
 
+
     return () => {
       socketRef.current?.disconnect();
     };
