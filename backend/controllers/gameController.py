@@ -119,7 +119,7 @@ class GameController(Controller):
             return False
 
     def clue_empties(self, answer):
-        clue = ''.join('_ ' if c != ' ' else '   ' for c in answer)
+        clue = ''.join('_ ' if c != ' ' else '\t' for c in answer)
         clue = clue.strip()
         return clue
 
@@ -132,7 +132,7 @@ class GameController(Controller):
 
         clue = ''
         for word in words:
-            clue += word[0] + ' ' + '_ ' * (len(word) - 1) + '   '
+            clue += word[0] + ' ' + '_ ' * (len(word) - 1) + '\t'
 
         return clue.strip()
 
@@ -206,4 +206,4 @@ class GameController(Controller):
 
             result_words.append(' '.join(word_result))
 
-        return '   '.join(result_words)
+        return '\t'.join(result_words)

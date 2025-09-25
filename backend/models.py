@@ -35,6 +35,8 @@ class Account(db.Model):
     type = db.Column(db.String(20), default='user')  # e.g., 'user', 'admin', 'guest
 
     messages = db.relationship('Message', backref='account', cascade="all, delete-orphan")
+    connected_chatrooms = db.relationship('UserChatRoom', backref='account', cascade="all, delete-orphan")
+
 
     def __init__(self, username, passwordHash=None, eMail=None, avatar=None):
         if not avatar or avatar == "":
@@ -142,6 +144,39 @@ class Message(db.Model):
         self.accountId = accountId
         self.content = content
         self.timestamp = timestamp
+
+
+class BugReport(db.Model):
+    __tablename__ = 'bug_reports'
+
+    reportId = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False, default='Bug Report')
+    description = db.Column(db.String(2000), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    status = db.Column(db.String(50), nullable=False, default='open')  # e.g., 'open', 'in progress', 'closed'
+
+    def __init__(self, title, description):
+        self.title = title
+        self.description = description
+        self.status = 'open'
+        self.timestamp = datetime.utcnow()
+
+
+class Suggestion(db.Model):
+    __tablename__ = 'suggestions'
+
+    suggestionId = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False, default='Suggestion')
+    description = db.Column(db.String(2000), nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    status = db.Column(db.String(50), nullable=False, default='open')  # e.g., 'open', 'in review', 'implemented'
+
+    def __init__(self, title, description):
+        self.title = title
+        self.description = description
+        self.status = 'open'
+        self.timestamp = datetime.utcnow()
+
 
 
 class Data(db.Model):

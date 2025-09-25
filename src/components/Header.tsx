@@ -24,10 +24,18 @@ export default function Header() {
             onClick={() => {
               router.push("/room");
             }}
+            className="bg-green-600 hover:bg-green-700 text-white"
           >
             Rooms
           </Button>
         )}
+        <Button
+          onClick={() => {
+            router.push("/feedback");
+          }}
+        >
+          Give feedback
+        </Button>
       </div>
       <div className="flex items-center">
         {user ? (
@@ -45,10 +53,15 @@ export default function Header() {
       </div>
       {user && (
         <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-          <Button onClick={() => router.push("/profile")}>Edit profile</Button>
+          <Button
+            onClick={() => router.push("/profile")}
+            className="text-white bg-blue-500 hover:bg-blue-600"
+          >
+            Edit Profile
+          </Button>
           <Button
             onClick={logout}
-            className="text-white bg-blue-500 hover:bg-blue-900"
+            className="text-white bg-gray-500 hover:bg-gray-900"
           >
             Logout
           </Button>

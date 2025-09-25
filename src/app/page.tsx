@@ -107,9 +107,17 @@ export default function Home() {
             localStorage.setItem("jwt", response.data.data.access_token);
             login(response.data.data.user);
             router.push("/room");
+          } else if (
+            response.data &&
+            response.data.data &&
+            !response.data.success
+          ) {
+            toast.error("Login failed: " + response.data.data);
           } else {
             toast.error("Login failed. Please check your credentials.");
           }
+              
+            
         })
         .catch((response) => {
           toast.error("Login failed. Please check your credentials.");

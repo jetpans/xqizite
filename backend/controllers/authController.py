@@ -23,6 +23,8 @@ class AuthController(Controller):
         self.app.add_url_rule("/login", view_func=self.login, methods=["POST"])
         self.app.add_url_rule("/logout", view_func=self.logout, methods=["POST", "GET"])
         self.app.add_url_rule("/updateProfile", view_func=self.update, methods=["POST"])
+        self.app.add_url_rule("/bugReport", view_func=self.report_bug, methods=["POST"])
+        self.app.add_url_rule("/suggestFeature", view_func=self.suggest_feature, methods=["POST"])
 
         self.email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
         self.password_regex = "^(?=.*?[a-z])(?=.*?[0-9]).{6,}$"
@@ -132,6 +134,43 @@ class AuthController(Controller):
                 return {"success": False, "data": "Wrong credentials."}
         else:
             return result
+
+    def report_bug(self):
+        data = request.get_json()
+        title = data.get("title", "").strip()
+        if not title:
+            return {"success": False, "data": "Title is required."}
+        if len(title) > 200:
+            return {"success": False, "data": "Title is too long."}
+
+        description = data.get("description", "").strip()
+        if not description:
+            return {"success": False, "data": "Description is required."}
+        if len(description) > 2000:
+            return {"success": False, "data": "Description is too long."}
+
+        from models import BugReport
+        new_report = BugReport(title=title, description=description)
+        self.db.session.add(new_report)
+        self.db.session.commit()
+        return {"success": True, "data": "Bug report submitted."}
+
+    def suggest_feature(self):
+        data = request.get_json()
+        title = data.get("title", "Suggestion").strip()
+        if len(title) > 200:
+            return {"success": False, "data": "Title is too long."}
+        description = data.get("description", "").strip()
+        if not description:
+            return {"success": False, "data": "Description is required."}
+        if len(description) > 2000:
+            return {"success": False, "data": "Description is too long."}
+
+        from models import Suggestion
+        new_suggestion = Suggestion(title=title, description=description)
+        self.db.session.add(new_suggestion)
+        self.db.session.commit()
+        return {"success": True, "data": "Suggestion submitted."}
 
     def logout(self):
         response = {"success": True, "data": "Logout successful."}
