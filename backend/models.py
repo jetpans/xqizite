@@ -37,6 +37,8 @@ class Account(db.Model):
     messages = db.relationship('Message', backref='account', cascade="all, delete-orphan")
 
     def __init__(self, username, passwordHash=None, eMail=None, avatar=None):
+        if not avatar or avatar == "":
+            avatar = "https://avataaars.io"
         if not passwordHash or not eMail:
             self.passwordHash = None
             self.eMail = None

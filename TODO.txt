@@ -3,10 +3,10 @@ TASKS:
 HARD
 Figure out landing page?
 User profile settings (username avatar password)
+Implement avatar editor
 ChatGPT API hook for different answers.
 Add XP level to users
 Submit question page
-Implement avatar editor
 Admin panel with auth
 (admin) approve questions
 (admin) edit questions

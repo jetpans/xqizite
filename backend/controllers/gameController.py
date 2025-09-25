@@ -53,7 +53,7 @@ class GameController(Controller):
                                 self.socketio.emit("update_question", msg, room=room.chatRoomId)
                                 self.room_latest_updates[room.chatRoomId] = msg
                                 print(f"New question in room {room.chatRoomId}: {question.questionText}")
-                                pass
+
                             elif counter in timers["clues"]:
                                 question = self.db.session.query(Question).filter_by(
                                     questionId=room.activeQuestionId).first()
@@ -64,7 +64,7 @@ class GameController(Controller):
                                 self.socketio.emit("update_question", msg, room=room.chatRoomId)
                                 self.room_latest_updates[room.chatRoomId] = msg
                                 print(f"Clue for room {room.chatRoomId}: {clue}")
-                                pass
+
                             elif counter >= timers["end"]:
                                 question = self.db.session.query(Question).filter_by(
                                     questionId=room.activeQuestionId).first()
@@ -79,14 +79,16 @@ class GameController(Controller):
                                 self.socketio.emit("update_question", msg, room=room.chatRoomId)
                                 print(f"Question ended in room {room.chatRoomId}. Answer: {answer}")
                                 self.room_latest_updates[room.chatRoomId] = msg
-                                pass
+
                             self.room_counters[room.chatRoomId] += 1
             except Exception as e:
                 print("Error in game loop")
                 print(e)
                 pass
-
             time.sleep(1)
+
+
+
 
     def get_random_question(self):
         question = self.db.session.query(Question).order_by(func.random()).first()
@@ -112,7 +114,7 @@ class GameController(Controller):
                 self.correct_users[room.chatRoomId].add(username)
                 end_type = room.type.config["end_type"]
                 if end_type == 'instant':
-                    self.room_counters[room.chatRoomId] = room.type.config.event_timers["end"] + 10
+                    self.room_counters[room.chatRoomId] = room.type.config["event_timers"]["end"] + 10
                 return True
             return False
 

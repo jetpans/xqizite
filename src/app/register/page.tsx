@@ -5,6 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { defaultAvatar } from "@/lib/utils";
 
 import {
   Form,
@@ -33,6 +34,7 @@ import { API_URL } from "@/constants";
 const formSchema = registerFormSchema;
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
 import { randomAvatar } from "@/lib/utils";
+
 export default function RegisterPreview() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,9 +45,7 @@ export default function RegisterPreview() {
       confirmPassword: "",
     },
   });
-  const [randomAvatarUrl, setRandomAvatarUrl] = useState(
-    "https://avataaars.io/?avatarStyle=Circle&topType=Hat&accessoriesType=Sunglasses&facialHairType=MoustacheFancy&facialHairColor=Brown&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Grimace&skinColor=Pale"
-  );
+  const [randomAvatarUrl, setRandomAvatarUrl] = useState(defaultAvatar);
   const router = useRouter();
 
   const dc = new dataController();

@@ -14,7 +14,6 @@ from datetime import timedelta
 
 from flask_mail import Mail, Message
 
-
 class AuthController(Controller):
     def __init__(self, app, db, bcrypt, jwt):
         super().__init__(app, db, jwt)
@@ -22,14 +21,40 @@ class AuthController(Controller):
 
         self.app.add_url_rule("/register", view_func=self.register, methods=["POST"])
         self.app.add_url_rule("/login", view_func=self.login, methods=["POST"])
-
         self.app.add_url_rule("/logout", view_func=self.logout, methods=["POST", "GET"])
+        self.app.add_url_rule("/updateProfile", view_func=self.update, methods=["POST"])
 
         self.email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
         self.password_regex = "^(?=.*?[a-z])(?=.*?[0-9]).{6,}$"
         self.REGISTER_REQUIRED_FIELDS = ["email", "username", "password"]
         self.LOGIN_REQUIRED_FIELDS = ["email", "username", "password", "roleId", "profileImage", ]
         self.username_range = (6, 20)
+
+    @jwt_required()
+    def update(self):
+        try:
+
+            current_user = get_jwt_identity()
+        except Exception as e:
+            return {"success": False, "data": "Not logged in."}
+
+        data = request.get_json()
+        user, new_avatar = data.get("username"), data.get("avatar")
+        if not user or not new_avatar:
+            return {"success": False, "data": "Missing username or avatar."}
+        if not user == current_user:
+            return {"success": False, "data": "You can only update your own profile."}
+
+        if not new_avatar.startswith("https://avataaars.io"):
+            return {"success": False, "data": "Avatar must be a valid URL."}
+
+        acc = self.db.session.query(Account).filter_by(username=user).first()
+        if not acc:
+            return {"success": False, "data": "User not found."}
+        acc.avatar = new_avatar
+        self.db.session.commit()
+        print(f"Updated avatar for user {user} to {new_avatar}")
+        return {"success": True, "data": "Profile updated."}
 
     def register(self):
         data = request.get_json()
@@ -38,6 +63,10 @@ class AuthController(Controller):
         if result == "OK":
             passwordHash = self.bcrypt.generate_password_hash(data["password"]).decode("utf-8")
             f = data
+            if "avatar" in f and f["avatar"] is not None and f["avatar"] != "":
+                if not f["avatar"].startswith("https://avataaars.io"):
+                    return {"success": False, "data": "Avatar must be a valid URL."}
+
             newAcc = Account(f["username"], passwordHash, f["email"], avatar=f.get("avatar", None))
             self.db.session.add(newAcc)
             self.db.session.commit()
@@ -52,6 +81,9 @@ class AuthController(Controller):
             acc = self.db.session.query(Account).filter_by(username=data["username"]).first()
             if acc:
                 return {"success": False, "data": "Username already in use."}
+            if "avatar" in data and data["avatar"] is not None and data["avatar"] != "":
+                if not data["avatar"].startswith("https://avataaars.io"):
+                    return {"success": False, "data": "Avatar must be a valid URL."}
             myUser = Account(username=data["username"], avatar=data.get("avatar", None))
             print("Guest login, avatar:", data.get("avatar", None))
             access_token = create_access_token(identity=myUser.username, additional_claims={
@@ -83,6 +115,7 @@ class AuthController(Controller):
                     "id": myUser.accountId,
                     "username": myUser.username,
                     "email": myUser.eMail,
+                    "avatar": myUser.avatar,
                 }
 
                 resp = {"success": True, "data": {"user": user, "access_token": access_token}}

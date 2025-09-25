@@ -31,7 +31,7 @@ import { useUser } from "@/context/UserContext";
 import { API_URL } from "@/constants";
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
 import { useEffect, useState } from "react";
-import { randomAvatar } from "@/lib/utils";
+import { randomAvatar, defaultAvatar } from "@/lib/utils";
 
 const formSchema = loginFormSchema;
 const guestFormSchema = z.object({
@@ -56,9 +56,7 @@ export default function LoginPreview() {
     },
   });
 
-  const [randomAvatarUrl, setRandomAvatarUrl] = useState<string>(
-    "https://avataaars.io/?avatarStyle=Circle&topType=Hat&accessoriesType=Sunglasses&facialHairType=MoustacheFancy&facialHairColor=Brown&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Grimace&skinColor=Pale"
-  );
+  const [randomAvatarUrl, setRandomAvatarUrl] = useState<string>(defaultAvatar);
 
   const router = useRouter();
 

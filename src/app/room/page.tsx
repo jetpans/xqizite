@@ -119,7 +119,21 @@ export default function Room() {
   }, [userCounts]);
 
   return (
-    <div className="flex flex-row justify-center mt-[1rem] w-full h-full flex-wrap">
+    <div
+      className="flex flex-row justify-center mt-[1rem] w-full h-full flex-wrap"
+      onCopy={(e) => {
+        alert("Copying is not allowed!");
+        e.preventDefault();
+      }}
+      onCut={(e) => {
+        alert("Cutting is not allowed!");
+        e.preventDefault();
+      }}
+      onPaste={(e) => {
+        alert("Pasting is not allowed!");
+        e.preventDefault();
+      }}
+    >
       <div className="info">
         <div className="roomlist m-[1rem] min-w-[10vw]">
           <h2 className="text-lg font-bold mb-4">Chat Rooms</h2>
@@ -188,19 +202,19 @@ export default function Room() {
           Select room ...
         </div>
       ) : (
-        <div className="chat w-[60vw] max-h-[90vh] min-h-[90vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white flex flex-col">
+        <div className="chat mx-3 min-w-[60vw] max-h-[90vh] min-h-[90vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white flex flex-col">
           <div className="flex items-center justify-center p-4 border-b h-[10%]">
             <ChatBubbleAvatar src={activeRoom.icon}></ChatBubbleAvatar>
             <h2 className="text-xl font-semibold">{activeRoom.name}</h2>
           </div>
           <div className="question p-4 border-b  bg-gray-100 flex flex-col gap-3 items-center justify-center">
-            <h3 className="questiontext text-lg font-medium">
+            <h3 className="questiontext text-lg font-medium select-none">
               {activeQuestion
                 ? `${activeQuestion.question}`
                 : "Waiting for the next question..."}
             </h3>
 
-            <div className="ml-4 p-1 bg-yellow-200 rounded-md text-lg font-medium whitespace-pre">
+            <div className="ml-4 p-1 bg-yellow-200 rounded-md text-lg font-medium whitespace-pre select-none">
               {activeQuestion?.answer
                 ? 'Answer was "' + activeQuestion.answer + '"'
                 : activeQuestion?.clue
@@ -208,21 +222,23 @@ export default function Room() {
                 : "?"}
             </div>
           </div>
-          <ChatMessageList className="h-auto">
+          <ChatMessageList className="h-auto max-h-[57vh]">
             {messages.map((message, index) => {
               return (
                 <ChatBubble key={message.messageId} layout="ai">
                   <ChatBubbleAvatar
                     src={message.avatar}
                     fallback={message.username[0].toUpperCase()}
+                    className="w-16 h-16"
                   />
-
                   {message.isCorrect ? (
                     <ChatBubbleMessage className="bg-green-100">
-                      {message.message}
+                      {message.username}:{message.message}
                     </ChatBubbleMessage>
                   ) : (
-                    <ChatBubbleMessage>{message.message}</ChatBubbleMessage>
+                    <ChatBubbleMessage>
+                      <b>{message.username}</b> : {message.message}
+                    </ChatBubbleMessage>
                   )}
                 </ChatBubble>
               );
