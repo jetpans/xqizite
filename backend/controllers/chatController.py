@@ -15,6 +15,7 @@ class ChatController(Controller):
         self.db = db
         self.game_controller = game_controller
         self.denied_users = set()
+        self.username_to_avatar = {}
 
         self.socketio.on_event("connect", self.connect)
         self.socketio.on_event("disconnect", self.disconnect)
@@ -37,6 +38,18 @@ class ChatController(Controller):
         session["sid"] = request.sid
 
         acc = self.db.session.query(Account).filter_by(username=user).first()
+        if acc:
+            self.username_to_avatar[user] = acc.avatar
+
+        if not acc and user in self.username_to_avatar:
+            account = Account(
+                username=user,
+                avatar=self.username_to_avatar[user])
+            self.db.session.add(account)
+            self.db.session.commit()
+            acc = account
+
+
         connections = self.db.session.query(UserChatRoom).filter_by(accountId=acc.accountId).all()
         if connections:
             # Deny connection

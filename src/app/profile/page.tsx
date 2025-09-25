@@ -16,7 +16,7 @@ export default function Home() {
   const { user, login, logout } = useUser();
   const [currentAvatar, setCurrentAvatar] = useState(user?.avatar || "");
   const [initial, setInitial] = useState<Partial<AvatarOptions>>({});
-
+  const router = useRouter();
   const dc = new dataController();
   const handleSubmit = () => {
     if (user) {
@@ -33,12 +33,24 @@ export default function Home() {
           login({ ...user, avatar: currentAvatar });
           toast.success("Profile updated successfully!");
         } else {
-          alert("Failed to update profile: " + response.data.data.message);
+          toast.error(
+            "Failed to update profile: " + response.data.data.message
+          );
         }
       });
     }
   };
   useEffect(() => {
+    if (!user) {
+      router.push("/");
+      return;
+    }
+    if (user.guest) {
+      toast.error("Guest users cannot customize avatar.");
+      router.push("/room");
+      return;
+    }
+
     if (user?.avatar) {
       setCurrentAvatar(user.avatar);
     }
@@ -51,7 +63,6 @@ export default function Home() {
         opts[key as keyof AvatarOptions] = value;
       });
       setInitial(opts);
-      console.log("Initial avatar options:", opts);
     }
   }, [user]);
   return (

@@ -1,7 +1,6 @@
 TASKS:
 
 HARD
-Figure out landing page?
 
 Build and deploy pipeline
 
@@ -26,6 +25,7 @@ Style correct message
 
 COMPLETE
 
+Figure out landing page?
 Implement avatar editor
 Make guest login provide username
 Implement a game loop.

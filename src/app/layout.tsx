@@ -5,6 +5,8 @@ import { UserProvider } from "@/context/UserContext";
 import dataController from "@/lib/DataController";
 import { useUser } from "@/context/UserContext";
 import Header from "@/components/Header";
+import { Toaster } from "sonner";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -33,6 +35,7 @@ export default function RootLayout({
         <UserProvider>
           <Header />
           {children}
+          <Toaster position="top-center" richColors />
         </UserProvider>
       </body>
     </html>

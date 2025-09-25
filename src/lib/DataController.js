@@ -2,7 +2,6 @@ class dataController {
   constructor() {}
 
   GetData(path, token) {
-    // console.log("My token is !", token);
 
     return fetch(path, {
       method: "GET",
@@ -22,7 +21,6 @@ class dataController {
   }
 
   PostData(path, data, token) {
-    // console.log("Auth header");
     return fetch(path, {
       method: "POST",
       headers: {

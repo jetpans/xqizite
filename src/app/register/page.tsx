@@ -80,7 +80,6 @@ export default function RegisterPreview() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       // Assuming an async registration function
-      console.log(values);
       const registerData = {
         username: values.username,
         email: values.email,
@@ -88,12 +87,11 @@ export default function RegisterPreview() {
         avatar: randomAvatarUrl,
       };
 
-      console.log("Wanted path is: ", API_URL + "/register");
       dc.PostData(API_URL + "/register", registerData)
         .then((response) => {
           if (response.success === true && response.data.success === true) {
             setTimeout(() => {
-              router.push("/login");
+              router.push("/");
             }, 1000);
           } else {
             toast.error("Registration failed. Please try again.");
@@ -103,11 +101,7 @@ export default function RegisterPreview() {
           toast.error("Registration failed. Please try again.");
         });
 
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      toast.success("Registration successful.");
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
@@ -224,7 +218,7 @@ export default function RegisterPreview() {
           </Form>
           <div className="mt-4 text-center text-sm">
             Already have an account?{" "}
-            <Link href="/login" className="underline">
+            <Link href="/" className="underline">
               Login
             </Link>
           </div>

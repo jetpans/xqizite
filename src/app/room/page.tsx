@@ -86,16 +86,16 @@ export default function Room() {
       const accessToken = localStorage.getItem("jwt");
       if (accessToken === null) {
         logout();
-        router.push("/login");
+        router.push("/");
       }
 
       if (localStorage.getItem("jwt") === null) {
-        router.push("/login");
+        router.push("/");
       }
       router.push("/room");
     } else {
       if (localStorage.getItem("jwt") === null) {
-        router.push("/login");
+        router.push("/");
       }
     }
 
@@ -118,19 +118,35 @@ export default function Room() {
     }
   }, [userCounts]);
 
+  useEffect(() => {
+    if (!activeRoom.chatRoomId) return;
+
+    const unload = () => {
+      leaveRoom(activeRoom.chatRoomId);
+    };
+
+    window.addEventListener("beforeunload", unload);
+
+    return () => {
+      window.removeEventListener("beforeunload", unload);
+      // Optional: leave the room on unmount
+      leaveRoom(activeRoom.chatRoomId);
+    };
+  }, [activeRoom.chatRoomId]);
+
   return (
     <div
       className="flex flex-row justify-center mt-[1rem] w-full h-full flex-wrap"
       onCopy={(e) => {
-        alert("Copying is not allowed!");
+        toast.error("Copying is not allowed!");
         e.preventDefault();
       }}
       onCut={(e) => {
-        alert("Cutting is not allowed!");
+        toast.error("Cutting is not allowed!");
         e.preventDefault();
       }}
       onPaste={(e) => {
-        alert("Pasting is not allowed!");
+        toast.error("Pasting is not allowed!");
         e.preventDefault();
       }}
     >
@@ -202,7 +218,7 @@ export default function Room() {
           Select room ...
         </div>
       ) : (
-        <div className="chat mx-3 min-w-[60vw] max-h-[90vh] min-h-[90vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white flex flex-col">
+        <div className="chat mx-3 min-w-[90vw] max-w-[90vw] sm:min-w-[60vw] sm:max-w-[60vw] max-h-[90vh] min-h-[90vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white flex flex-col break-words">
           <div className="flex items-center justify-center p-4 border-b h-[10%]">
             <ChatBubbleAvatar src={activeRoom.icon}></ChatBubbleAvatar>
             <h2 className="text-xl font-semibold">{activeRoom.name}</h2>

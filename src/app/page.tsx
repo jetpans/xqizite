@@ -67,7 +67,6 @@ export default function Home() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       // Assuming an async login function
-      console.log(values);
       const loginData = {
         username: values.username,
         password: values.password,
@@ -87,11 +86,7 @@ export default function Home() {
           toast.error("Login failed. Please check your credentials.");
         });
 
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      toast.success("Login successful");
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");
@@ -101,7 +96,6 @@ export default function Home() {
   async function onGuestSubmit(values: z.infer<typeof guestFormSchema>) {
     try {
       // Assuming an async login function
-      console.log(values);
       const loginData = {
         guest: true,
         username: values.guestname,
@@ -120,11 +114,7 @@ export default function Home() {
         .catch((response) => {
           toast.error("Login failed. Please check your credentials.");
         });
-      toast(
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(values, null, 2)}</code>
-        </pre>
-      );
+      toast.success("Guest login successful");
     } catch (error) {
       console.error("Form submission error", error);
       toast.error("Failed to submit the form. Please try again.");

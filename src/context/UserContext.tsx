@@ -6,6 +6,7 @@ type User = {
   username: string;
   token: string;
   avatar?: string;
+  guest: boolean;
 };
 
 type UserContextType = {
@@ -34,7 +35,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("jwt");
-    window.location.href = "/login"; // Redirect to login page
+    window.location.href = "/"; // Redirect to login page
   };
 
   return (

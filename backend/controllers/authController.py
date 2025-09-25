@@ -51,6 +51,9 @@ class AuthController(Controller):
         acc = self.db.session.query(Account).filter_by(username=user).first()
         if not acc:
             return {"success": False, "data": "User not found."}
+        if acc.type == "guest":
+            return {"success": False, "data": "Guest users cannot update profile."}
+
         acc.avatar = new_avatar
         self.db.session.commit()
         # print(f"Updated avatar for user {user} to {new_avatar}")
@@ -93,6 +96,7 @@ class AuthController(Controller):
                 "username": myUser.username,
                 "avatar": myUser.avatar,
                 "email": myUser.eMail,
+                "guest": True
             }
 
             resp = {"success": True, "data": {"user": user, "access_token": access_token}}
@@ -105,6 +109,8 @@ class AuthController(Controller):
 
         if result == "OK":
             myUser = self.db.session.query(Account).filter_by(username=data["username"]).first()
+            if not myUser:
+                return {"success": False, "data": "Wrong credentials."}
             userHashedPassword = myUser.passwordHash
             isCorrect = self.bcrypt.check_password_hash(userHashedPassword, data["password"])
             if (isCorrect):
@@ -116,6 +122,7 @@ class AuthController(Controller):
                     "username": myUser.username,
                     "email": myUser.eMail,
                     "avatar": myUser.avatar,
+                    "guest": False
                 }
 
                 resp = {"success": True, "data": {"user": user, "access_token": access_token}}
