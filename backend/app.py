@@ -43,6 +43,7 @@ ALLOWED_ORIGINS = [
     'http://www.jetpans.com',
     'http://159.69.223.82',
     'https://159.69.223.82',
+    'http://159.69.223.82/',
 ]
 
 bcrypt = Bcrypt(app)
@@ -91,8 +92,8 @@ def add_cors_headers(response):
     return response
 
 
-@app.route('/<path:path>', methods=['OPTIONS'])
-def handle_options(path):
+@app.before_request
+def handle_options():
     response = jsonify({'status': 'ok'})
     origin = request.headers.get('Origin')
     if origin in ALLOWED_ORIGINS:
