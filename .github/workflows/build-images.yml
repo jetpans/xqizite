@@ -28,7 +28,7 @@ jobs:
 
     - name: Build and start Docker Compose
       run: |
-        docker-compose -f docker-compose.yml up -d --build
+        docker compose -f docker-compose.yml up -d --build
 
     - name: Wait for backend to be ready
       run: |
@@ -63,4 +63,4 @@ jobs:
       run: docker push $FRONTEND_IMAGE
 
     - name: Shut down Docker Compose
-      run: docker-compose -f docker-compose.yml down
+      run: docker compose -f docker-compose.yml down
