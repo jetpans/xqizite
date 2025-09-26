@@ -35,10 +35,20 @@ if env == 'production':
 else:
     app.config.from_object(DevelopmentConfig)
 
+ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'https://jetpans.com',
+    'https://www.jetpans.com',
+    'http://jetpans.com',
+    'http://www.jetpans.com',
+    'http://159.69.223.82',
+    'https://159.69.223.82',
+]
+
 bcrypt = Bcrypt(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins=ALLOWED_ORIGINS)
 
 
 @app.before_request
@@ -63,15 +73,7 @@ def heartbeat():
 #     # return render_template("index.html")
 
 
-ALLOWED_ORIGINS = [
-    'http://localhost:3000',
-    'https://jetpans.com',
-    'https://www.jetpans.com',
-    'http://jetpans.com',
-    'http://www.jetpans.com',
-    'http://159.69.223.82',
-    'https://159.69.223.82',
-]
+
 
 
 @app.after_request
