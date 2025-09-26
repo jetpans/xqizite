@@ -6,10 +6,14 @@ services:
       context: ./backend         # backend Dockerfile lives here
       dockerfile: Dockerfile
     container_name: xqz-backend
-    env_file:
-      - ./backend/.env
     ports:
       - "5000:5000"
+    environment:
+      - FLASK_ENV=${FLASK_ENV}
+      - DB_CONNECT_URL_PROD=${DB_CONNECT_URL_PROD}
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      
     restart: unless-stopped
 
   frontend:

@@ -6,6 +6,10 @@ on:
 env:
   BACKEND_IMAGE: jetpans/xqzite:backend-latest
   FRONTEND_IMAGE: jetpans/xqzite:fronted-latest
+  FLASK_ENV: ${{ secrets.FLASK_ENV }}
+  DB_CONNECT_URL_PROD: ${{ secrets.DB_CONNECT_URL_PROD }}
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
 
 jobs:
   build-test-push:
