@@ -6,6 +6,7 @@ services:
       context: ./backend         # backend Dockerfile lives here
       dockerfile: Dockerfile
     container_name: xqz-backend
+    image: xqz-backend:latest
     ports:
       - "5000:5000"
     environment:
@@ -13,7 +14,7 @@ services:
       - DB_CONNECT_URL_PROD=${DB_CONNECT_URL_PROD}
       - SECRET_KEY=${SECRET_KEY}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      
+
     restart: unless-stopped
 
   frontend:
@@ -23,6 +24,7 @@ services:
       args:
         NEXT_PUBLIC_BACKEND_URL: http://localhost:5000
     container_name: xqz-frontend
+    image: xqz-frontend:latest
     ports:
       - "3000:3000"
     depends_on:
