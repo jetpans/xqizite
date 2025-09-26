@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/context/UserContext";
-import dataController from "@/lib/DataController";
-import { useUser } from "@/context/UserContext";
 import Header from "@/components/Header";
 import { Toaster } from "sonner";
 

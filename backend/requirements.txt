@@ -7,11 +7,7 @@ flask_jwt_extended
 datetime
 dateutils
 flask_mail
-mailjet_rest
-firebase-admin
-google-cloud-storage
-# firebase_config
-python-firebase
 flask_migrate
 flask_socketio
-psycopg2
+psycopg2-binary
+eventlet

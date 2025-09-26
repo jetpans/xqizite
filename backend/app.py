@@ -1,6 +1,3 @@
-from dotenv import load_dotenv
-load_dotenv()
-
 from flask_socketio import SocketIO
 from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, \
     unset_jwt_cookies, jwt_required, JWTManager
@@ -56,6 +53,10 @@ def home():
     # return render_template("index.html")
 
 
+@app.route("/heartbeat")
+def heartbeat():
+    return {"success": True, "data": "API is running"}
+
 # @app.route("/<path:path>", methods=["GET"])
 # def catch_all(path):
 #     return {"success": True, "data": "API is running"}
@@ -98,8 +99,9 @@ gameController = GameController(app, db, socketio,jwt)
 chatController = ChatController(app, db, jwt, socketio, gameController)
 roomController = RoomController(app, db, jwt)
 
-game_thread = threading.Thread(target=gameController.game_loop, daemon=True)
-game_thread.start()
+if os.environ.get("GUNICORN_WORKER_ID") is None:
+    game_thread = threading.Thread(target=gameController.game_loop, daemon=True)
+    game_thread.start()
 
 with app.app_context():
     db.session.query(UserChatRoom).delete()

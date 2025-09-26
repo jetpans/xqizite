@@ -101,6 +101,7 @@ export default function Home() {
         username: values.guestname,
         avatar: randomAvatarUrl,
       };
+      console.log("API URL IS: " + API_URL);
       dc.PostData(API_URL + "/login", loginData)
         .then((response) => {
           if (response.success === true && response.data.success === true) {

@@ -44,3 +44,4 @@ next-env.d.ts
 backend/data/trivia_full.csv
 backend/data/trivia.csv
 backend/tempCodeRunnerFile.py
+__pycache__/testHeartbeat.cpython-313-pytest-8.4.2.pyc

@@ -16,9 +16,7 @@ import dataController from "@/lib/DataController";
 import { API_URL } from "@/constants";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation"; // Use Next.js router for navigation
-interface ChatRoomProps {
-  token: string;
-}
+
 
 interface Room {
   chatRoomId: number;
@@ -249,7 +247,7 @@ export default function Room() {
                   />
                   {message.isCorrect ? (
                     <ChatBubbleMessage className="bg-green-100">
-                      {message.username}:{message.message}
+                      <b>{message.username}</b> : {message.message}
                     </ChatBubbleMessage>
                   ) : (
                     <ChatBubbleMessage>

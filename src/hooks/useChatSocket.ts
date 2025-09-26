@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 import { useUser } from "@/context/UserContext";
-import { API_URL } from "@/constants";
 import { getSocket } from "@/lib/socket";
 import { toast } from "sonner";
 // Types for incoming messages from the server

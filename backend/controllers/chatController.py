@@ -49,6 +49,9 @@ class ChatController(Controller):
             self.db.session.commit()
             acc = account
 
+        if not acc:
+            emit("invalid_token", "Account not found, disconnecting.")
+            return
 
         connections = self.db.session.query(UserChatRoom).filter_by(accountId=acc.accountId).all()
         if connections:
@@ -68,6 +71,9 @@ class ChatController(Controller):
             print(f"Denied connection for {user}.")
             return
         account = self.db.session.query(Account).filter_by(username=user).first()
+        if not account:
+            print(f"Account for user {user} not found on disconnect.")
+            return
         rooms = self.db.session.query(UserChatRoom).filter_by(accountId=account.accountId).all()
         connected_to_rooms = []
         for room in rooms:
