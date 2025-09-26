@@ -86,15 +86,20 @@ def add_cors_headers(response):
         'https://www.jetpans.com',
         'http://jetpans.com',
         'http://www.jetpans.com',
+        'http://159.69.223.82',      # Add this
+        'https://159.69.223.82',     # And this for HTTPS
     ]
 
     if origin in allowed_origins:
         response.headers['Access-Control-Allow-Origin'] = origin
+    else:
+        # Debug: log the origin that's being rejected
+        print(f"CORS: Rejected origin: {origin}")
 
     response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Max-Age'] = '3600'  # Cache preflight for 1 hour
+    response.headers['Access-Control-Max-Age'] = '3600'
 
     return response
 
@@ -103,7 +108,21 @@ def add_cors_headers(response):
 def handle_preflight():
     if request.method == "OPTIONS":
         response = jsonify({'status': 'ok'})
-        response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+
+        origin = request.headers.get('Origin')
+        allowed_origins = [
+            'http://localhost:3000',
+            'https://jetpans.com',
+            'https://www.jetpans.com',
+            'http://jetpans.com',
+            'http://www.jetpans.com',
+            'http://159.69.223.82',      # Add this
+            'https://159.69.223.82',     # And this
+        ]
+
+        if origin in allowed_origins:
+            response.headers['Access-Control-Allow-Origin'] = origin
+
         response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         response.headers['Access-Control-Allow-Credentials'] = 'true'
