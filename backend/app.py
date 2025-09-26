@@ -65,6 +65,8 @@ def heartbeat():
 
 @app.after_request
 def add_cors_headers(response):
+
+
     response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
     response.headers['Access-Control-Allow-Origin'] = '*'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
@@ -73,25 +75,39 @@ def add_cors_headers(response):
 
 
 @app.after_request
-def refresh_expiring_jwts(response):
-    try:
-        exp_timestamp = get_jwt()["exp"]
-        now = datetime.now(timezone.utc)
-        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
-        if target_timestamp > exp_timestamp:
-            # access_token = create_access_token(identity=myUser.username, additional_claims={"roleId":myUser.roleId}, expires_delta=timedelta(hours=1))
+def add_cors_headers(response):
+    # Get the origin from the request
+    origin = request.headers.get('Origin')
 
-            access_token = create_access_token(identity=get_jwt_identity(), additional_claims={
-                                               "roleId": get_jwt()["roleId"]}, expires_delta=timedelta(hours=1))
-            data = response.get_json()
-            if type(data) is dict:
-                data["access_token"] = access_token
-                response.data = json.dumps(data)
-        return response
-    except (RuntimeError, KeyError):
-        # Case where there is not a valid JWT. Just return the original respone
-        return response
+    # Allow specific origins
+    allowed_origins = [
+        'http://localhost:3000',
+        'https://jetpans.com',
+        'https://www.jetpans.com',
+        'http://jetpans.com',
+        'http://www.jetpans.com',
+    ]
 
+    if origin in allowed_origins:
+        response.headers['Access-Control-Allow-Origin'] = origin
+
+    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Max-Age'] = '3600'  # Cache preflight for 1 hour
+
+    return response
+
+
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = jsonify({'status': 'ok'})
+        response.headers['Access-Control-Allow-Origin'] = request.headers.get('Origin', '*')
+        response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
 
 
 authController = AuthController(app, db, bcrypt, jwt)
