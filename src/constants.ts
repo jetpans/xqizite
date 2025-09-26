@@ -1,6 +1,6 @@
 "use client";
 
-let API_URL = "http://jetpans.com/api"; // default for production
+let API_URL = "http://www.jetpans.com/api"; // default for production
 
 if (typeof window !== "undefined") {
   // Runs only on the client
