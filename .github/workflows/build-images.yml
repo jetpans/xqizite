@@ -5,7 +5,7 @@ on:
 
 env:
   BACKEND_IMAGE: jetpans/xqzite:backend-latest
-  FRONTEND_IMAGE: jetpans/xqzite:fronted-latest
+  FRONTEND_IMAGE: jetpans/xqzite:frontend-latest
   FLASK_ENV: ${{ secrets.FLASK_ENV }}
   DB_CONNECT_URL_PROD: ${{ secrets.DB_CONNECT_URL_PROD }}
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
