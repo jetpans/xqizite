@@ -44,7 +44,6 @@ ALLOWED_ORIGINS = [
     'http://www.jetpans.com',
     'http://159.69.223.82',
     'https://159.69.223.82',
-    'http://159.69.223.82/',
 ]
 
 bcrypt = Bcrypt(app)
@@ -70,8 +69,14 @@ def heartbeat():
 @app.after_request
 def add_cors_headers(response):
     origin = request.headers.get('Origin')
+
+    # Allow requests from allowed origins
     if origin in ALLOWED_ORIGINS:
         response.headers['Access-Control-Allow-Origin'] = origin
+    # For requests without Origin header (like direct browser access)
+    elif not origin:
+        response.headers['Access-Control-Allow-Origin'] = '*'
+
     response.headers['Access-Control-Allow-Headers'] = (
         'Origin, Accept, X-Requested-With, Content-Type, '
         'Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
@@ -80,22 +85,36 @@ def add_cors_headers(response):
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     response.headers['Access-Control-Max-Age'] = '3600'
     return response
+
 
 
 @app.before_request
-def handle_options():
-    response = jsonify({'status': 'ok'})
-    origin = request.headers.get('Origin')
-    if origin in ALLOWED_ORIGINS:
-        response.headers['Access-Control-Allow-Origin'] = origin
-    response.headers['Access-Control-Allow-Headers'] = (
-        'Origin, Accept, X-Requested-With, Content-Type, '
-        'Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
-    )
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers['Access-Control-Allow-Credentials'] = 'true'
-    response.headers['Access-Control-Max-Age'] = '3600'
-    return response
+def log_request_info():
+    print(f"Origin: {request.headers.get('Origin')}")
+    print(f"Method: {request.method}")
+    print(f"Path: {request.path}")
+
+
+@app.before_request
+def handle_preflight():
+    # Only handle OPTIONS requests (preflight requests)
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        origin = request.headers.get('Origin')
+
+        if origin in ALLOWED_ORIGINS:
+            response.headers['Access-Control-Allow-Origin'] = origin
+        elif not origin:
+            response.headers['Access-Control-Allow-Origin'] = '*'
+
+        response.headers['Access-Control-Allow-Headers'] = (
+            'Origin, Accept, X-Requested-With, Content-Type, '
+            'Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
+        )
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers['Access-Control-Max-Age'] = '3600'
+        return response
 
 authController = AuthController(app, db, bcrypt, jwt)
 gameController = GameController(app, db, socketio,jwt)
