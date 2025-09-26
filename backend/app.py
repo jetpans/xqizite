@@ -16,7 +16,7 @@ from datetime import datetime, timedelta, timezone
 import os
 import json
 import threading
-
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 
 app = Flask(__name__)
@@ -29,6 +29,7 @@ app.config["IMAGE_DIRECTORY"] = "images"
 
 app.config['MAX_CONTENT_LENGTH'] = 7 * 1024 * 1024  # X * 1024 *1024 === X Megabytes
 
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 if env == 'production':
     app.config.from_object(ProductionConfig)
@@ -52,11 +53,6 @@ jwt = JWTManager(app)
 socketio = SocketIO(app, cors_allowed_origins=ALLOWED_ORIGINS)
 
 
-@app.before_request
-def do():
-    # print(request.headers)
-    pass
-
 
 @app.route("/")
 def home():
@@ -67,12 +63,6 @@ def home():
 @app.route("/heartbeat")
 def heartbeat():
     return {"success": True, "data": "API is running"}
-
-# @app.route("/<path:path>", methods=["GET"])
-# def catch_all(path):
-#     return {"success": True, "data": "API is running"}
-#     # return render_template("index.html")
-
 
 
 
