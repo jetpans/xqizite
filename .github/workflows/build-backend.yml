@@ -1,11 +1,10 @@
-name: Build and Push Docker Images
+name: Build backend
 
 on:
   workflow_dispatch: # manual trigger
 
 env:
   BACKEND_IMAGE: jetpans/xqzite:backend-latest
-  FRONTEND_IMAGE: jetpans/xqzite:frontend-latest
 jobs:
   build-test-push:
     runs-on: ubuntu-latest
@@ -26,14 +25,6 @@ jobs:
         docker build -f ./backend/Dockerfile -t xqz-backend ./backend
         docker tag xqz-backend $BACKEND_IMAGE
 
-    - name: Build frontend Docker image
-      run: |
-        docker build -f ./Dockerfile -t xqz-frontend .
-        docker tag xqz-frontend $FRONTEND_IMAGE
-
 
     - name: Push backend image to Docker Hub
       run: docker push $BACKEND_IMAGE
-
-    - name: Push frontend image to Docker Hub
-      run: docker push $FRONTEND_IMAGE
