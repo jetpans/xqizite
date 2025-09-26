@@ -10,6 +10,8 @@ env:
   DB_CONNECT_URL_PROD: ${{ secrets.DB_CONNECT_URL_PROD }}
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
   JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+  NEXT_PUBLIC_BACKEND_URL: http://localhost:5000
+  FRONTEND_URL: http://localhost:3000
 
 jobs:
   build-test-push:
