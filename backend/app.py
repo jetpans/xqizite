@@ -63,71 +63,46 @@ def heartbeat():
 #     # return render_template("index.html")
 
 
+ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+    'https://jetpans.com',
+    'https://www.jetpans.com',
+    'http://jetpans.com',
+    'http://www.jetpans.com',
+    'http://159.69.223.82',
+    'https://159.69.223.82',
+]
+
+
 @app.after_request
 def add_cors_headers(response):
-
-
-    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
-
-
-@app.after_request
-def add_cors_headers(response):
-    # Get the origin from the request
     origin = request.headers.get('Origin')
-
-    # Allow specific origins
-    allowed_origins = [
-        'http://localhost:3000',
-        'https://jetpans.com',
-        'https://www.jetpans.com',
-        'http://jetpans.com',
-        'http://www.jetpans.com',
-        'http://159.69.223.82',      # Add this
-        'https://159.69.223.82',     # And this for HTTPS
-    ]
-
-    if origin in allowed_origins:
+    if origin in ALLOWED_ORIGINS:
         response.headers['Access-Control-Allow-Origin'] = origin
-    else:
-        # Debug: log the origin that's being rejected
-        print(f"CORS: Rejected origin: {origin}")
-
-    response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
+    response.headers['Access-Control-Allow-Headers'] = (
+        'Origin, Accept, X-Requested-With, Content-Type, '
+        'Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
+    )
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     response.headers['Access-Control-Max-Age'] = '3600'
-
     return response
 
 
-@app.before_request
-def handle_preflight():
-    if request.method == "OPTIONS":
-        response = jsonify({'status': 'ok'})
-
-        origin = request.headers.get('Origin')
-        allowed_origins = [
-            'http://localhost:3000',
-            'https://jetpans.com',
-            'https://www.jetpans.com',
-            'http://jetpans.com',
-            'http://www.jetpans.com',
-            'http://159.69.223.82',      # Add this
-            'https://159.69.223.82',     # And this
-        ]
-
-        if origin in allowed_origins:
-            response.headers['Access-Control-Allow-Origin'] = origin
-
-        response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
-        return response
-
+@app.route('/<path:path>', methods=['OPTIONS'])
+def handle_options(path):
+    response = jsonify({'status': 'ok'})
+    origin = request.headers.get('Origin')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+    response.headers['Access-Control-Allow-Headers'] = (
+        'Origin, Accept, X-Requested-With, Content-Type, '
+        'Access-Control-Request-Method, Access-Control-Request-Headers, Authorization'
+    )
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    response.headers['Access-Control-Max-Age'] = '3600'
+    return response
 
 authController = AuthController(app, db, bcrypt, jwt)
 gameController = GameController(app, db, socketio,jwt)
