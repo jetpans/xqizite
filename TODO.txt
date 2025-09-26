@@ -2,7 +2,8 @@ TASKS:
 
 HARD
 
-Build and deploy pipeline
+deploy pipeline
+
 
 ChatGPT API hook for different answers.
 Add XP level to users

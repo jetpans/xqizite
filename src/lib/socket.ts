@@ -11,8 +11,9 @@ let socket: Socket | null = null;
  * Disconnects only when the tab/window is closed.
  */
 export function getSocket(token: string): Socket {
+  let socket_url = API_URL.replace("/api", ""); // Adjust if necessary
   if (!socket) {
-    socket = io(API_URL, {
+    socket = io(socket_url, {
       auth: { token },
       transports: ["websocket"],
     });
