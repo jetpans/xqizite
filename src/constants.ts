@@ -1,1 +1,12 @@
-export const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL!;
+"use client";
+
+let API_URL = "http://jetpans.com/api"; // default for production
+
+if (typeof window !== "undefined") {
+  // Runs only on the client
+  if (window.location.hostname === "localhost") {
+    API_URL = "http://localhost:5000";
+  }
+}
+
+export { API_URL };

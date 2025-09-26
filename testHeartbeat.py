@@ -2,8 +2,8 @@ import os
 
 import requests
 
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://err:3000")
-BACKEND_URL = os.environ.get("NEXT_PUBLIC_BACKEND_URL", "http://err:5000")
+FRONTEND_URL = os.environ.get("http://localhost:3000", "http://err:3000")
+BACKEND_URL = os.environ.get("http://localhost:5000", "http://err:5000")
 
 
 def test_frontend():

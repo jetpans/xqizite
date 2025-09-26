@@ -12,7 +12,7 @@ FLASK_CONTAINER="xqz-backend"
 NEXTJS_CONTAINER="xqz-frontend"
 
 # Ports mapping
-FLASK_PORT="5001:5000"      # host:container
+FLASK_PORT="5000:5000"      # host:container
 NEXTJS_PORT="3000:3000"       # host:container (frontend production)
 
 # Flask environment variables (example)
