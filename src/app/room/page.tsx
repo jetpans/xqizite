@@ -207,11 +207,9 @@ export default function Room() {
 
       {!activeRoom.chatRoomId ? (
         <div
-          className="chat w-[60vw] h-[60vh] border-solid 
-        border-2 border-gray-200 
-        rounded-lg shadow-lg bg-white
-        flex justify-center items-center
-        font-bold text-5xl family-sans text-gray-500"
+          className="
+        font-bold text-5xl family-sans text-gray-500 
+        chat mx-3 min-w-[90vw] max-w-[90vw] sm:min-w-[60vw] sm:max-w-[60vw] max-h-[90vh] min-h-[90vh] border-solid border-2 border-gray-200 rounded-lg shadow-lg bg-white flex flex-col break-words"
         >
           Select room ...
         </div>
